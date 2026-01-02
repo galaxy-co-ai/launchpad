@@ -1,0 +1,59 @@
+# Launchpad .gitignore
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Environment files (secrets)
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# Turbo
+.turbo/
+
+# Vercel
+.vercel/
+
+# Tauri
+src-tauri/target/
+
+# Database
+*.db
+*.sqlite
+
+# Secrets (extra paranoid)
+*.pem
+*.key
+secrets/
+.secrets/
+
+# Project-specific ignores can extend this in projects/*/

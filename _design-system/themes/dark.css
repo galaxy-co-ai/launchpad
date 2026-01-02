@@ -1,0 +1,88 @@
+/* ==========================================================================
+   LAUNCHPAD THEME — DARK MODE
+   Dark theme configuration (applied via .dark class)
+   ========================================================================== */
+
+.dark {
+  /* Color scheme declaration */
+  color-scheme: dark;
+
+  /* ==========================================================================
+     SEMANTIC TOKENS (DARK)
+     ========================================================================== */
+
+  /* Backgrounds */
+  --background: oklch(0.141 0.005 285.823);
+  --background-subtle: oklch(0.21 0.006 285.885);
+
+  /* Foregrounds (Text) */
+  --foreground: oklch(0.985 0 0);
+  --foreground-muted: oklch(0.552 0.016 285.938);
+
+  /* Primary — Main actions */
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.21 0.006 285.885);
+
+  /* Secondary — Alternative actions */
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  /* Muted — Disabled, hints */
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+
+  /* Accent — Highlights */
+  --accent: oklch(0.274 0.006 286.033);
+  --accent-foreground: oklch(0.985 0 0);
+
+  /* Cards & Popovers */
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.21 0.006 285.885);
+  --popover-foreground: oklch(0.985 0 0);
+
+  /* Status Colors (slightly adjusted for dark) */
+  --destructive: oklch(0.65 0.23 25);
+  --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.65 0.17 145);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.75 0.16 85);
+  --warning-foreground: oklch(0.15 0 0);
+  --info: oklch(0.55 0.19 260);
+  --info-foreground: oklch(0.985 0 0);
+
+  /* UI Chrome */
+  --border: oklch(0.274 0.006 286.033);
+  --input: oklch(0.274 0.006 286.033);
+  --ring: oklch(0.552 0.016 285.938);
+
+  /* Sidebar */
+  --sidebar: oklch(0.21 0.006 285.885);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.985 0 0);
+  --sidebar-primary-foreground: oklch(0.21 0.006 285.885);
+  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.274 0.006 286.033);
+  --sidebar-ring: oklch(0.552 0.016 285.938);
+
+  /* Charts (same as light - they work on dark) */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+}
+
+/* ==========================================================================
+   SYSTEM DARK MODE (Optional)
+   Use if you want to respect system preferences without manual toggle
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    /* Same values as .dark above */
+    /* Only use this if you want automatic system theme detection */
+    /* Remove this block if using manual toggle only */
+  }
+}

@@ -1,0 +1,2 @@
+# shadcn/ui components installed here via:
+# pnpm dlx shadcn@latest add button card input form dialog etc.
