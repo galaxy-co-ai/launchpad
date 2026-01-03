@@ -17,11 +17,35 @@
 
 ## Prompt Index
 
-| Name | Use Case | Variables |
-|------|----------|-----------|
-| Idea Validator | Quick validation scoring | `{IDEA_NAME}`, `{PROBLEM}`, `{SOLUTION}` |
-| Code Review | Review code for patterns | `{CODE}`, `{CONTEXT}` |
-| SOP Checker | Verify SOP completion | `{SOP_NUMBER}`, `{DELIVERABLES}` |
+| Name | Use Case | File |
+|------|----------|------|
+| Idea Intake Questions | Guide user through capturing a new idea | `IDEA_INTAKE_QUESTIONS.md` |
+| Validation Checklist | Score idea through SOP-01 validation | `VALIDATION_CHECKLIST.md` |
+| Scope Interview | Lock MVP features and non-goals | `SCOPE_INTERVIEW.md` |
+| Idea Validator | Quick validation scoring (simple) | Below |
+| Code Review | Review code for patterns | Below |
+| SOP Checker | Verify SOP completion | Below |
+
+---
+
+## Guided Workflow Prompts
+
+These prompts enable AI-guided conversations through the SOP pipeline:
+
+### Idea Intake (SOP-00)
+**File:** `IDEA_INTAKE_QUESTIONS.md`
+**Triggers:** "I have an idea", "new idea", "I want to build"
+**Output:** Creates IDEA-{slug}.md in vault
+
+### Validation (SOP-01)  
+**File:** `VALIDATION_CHECKLIST.md`
+**Triggers:** "validate this", "is this worth building", "score this idea"
+**Output:** Validation scores (Problem/Market/Monetization)
+
+### Scope Lock (SOP-02)
+**File:** `SCOPE_INTERVIEW.md`
+**Triggers:** "scope this MVP", "define features", "lock the scope"
+**Output:** Creates CONTRACT-{slug}.md with P0 features
 
 ---
 

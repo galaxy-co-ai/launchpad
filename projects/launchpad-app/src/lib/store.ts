@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { invoke } from "@tauri-apps/api/core";
+import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 import type {
   Project,
   CreateProjectInput,
@@ -14,6 +14,294 @@ import type {
   CreateIdeaInput,
   IdeaStatus,
 } from "./types";
+
+// Safe invoke wrapper - works in both Tauri and browser modes
+const invoke = async <T>(command: string, args?: Record<string, unknown>): Promise<T> => {
+  // Check if we're in Tauri environment
+  if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+    return tauriInvoke<T>(command, args);
+  }
+  
+  // Browser fallback - return mock data or throw helpful error
+  console.warn(`Tauri invoke("${command}") called in browser mode - returning mock data`);
+  
+  // Return appropriate mock data based on command
+  const mockData: Record<string, unknown> = {
+    get_all_settings: { theme: 'dark', sidebarCollapsed: false },
+    list_projects: [],
+    get_project: null,
+    list_conversations: [],
+    list_messages: [],
+    list_sops: [],
+    get_sop: null,
+    list_ideas: [],
+    list_roadmap_items: [],
+    init_default_sops: { success: true },
+  };
+  
+  return (mockData[command] ?? {}) as T;
+};
+
+// ============================================
+// SOP Detection and Guided Prompt Injection
+// ============================================
+
+interface SOPContext {
+  sopNumber: number;
+  sopName: string;
+  guidedPrompt: string;
+}
+
+/**
+ * Detects which SOP the user is asking about based on message content
+ * Returns the appropriate guided context for the AI
+ */
+function detectSOPContext(message: string): SOPContext | null {
+  const lowerMessage = message.toLowerCase();
+  
+  // SOP-00: Idea Intake
+  if (
+    lowerMessage.includes('i have an idea') ||
+    lowerMessage.includes('new idea') ||
+    lowerMessage.includes('i want to build') ||
+    lowerMessage.includes('what if we made') ||
+    lowerMessage.includes('there should be a tool') ||
+    lowerMessage.includes('i noticed a problem') ||
+    lowerMessage.includes('capture this idea')
+  ) {
+    return {
+      sopNumber: 0,
+      sopName: 'Idea Intake',
+      guidedPrompt: `## GUIDED MODE: Idea Intake (SOP-00)
+
+You are now guiding the user through capturing a new idea. Follow this structured flow:
+
+### Step 1: Problem Statement (Required)
+Ask: "Let's capture this idea properly. First, tell me about the **problem** you're solving: **Who** has this problem, and **what pain** does it cause them?"
+
+Validate their response includes:
+- A specific person/role (not "people" or "everyone")
+- A concrete pain point (time, money, frustration)
+
+### Step 2: Proposed Solution (Required)
+Ask: "Now, what would you build to solve this? Describe it in **one sentence**."
+
+### Step 3: Source (Required)
+Ask: "Where did this idea come from? (Personal pain / Someone told you / Saw online / Competitor gap / Random thought)"
+
+### Step 4: Initial Signals
+Quick-fire questions:
+1. "Have you searched for existing solutions?"
+2. "Would YOU pay for this if someone else built it? How much?"
+3. "Do you personally know anyone with this problem?"
+
+### Step 5: Confirm & Save
+Summarize what you captured and ask if they want to save it.
+
+**Be conversational but structured. Ask one section at a time. Track what's been answered.**`
+    };
+  }
+  
+  // SOP-01: Validation
+  if (
+    lowerMessage.includes('validate') ||
+    lowerMessage.includes('is this worth building') ||
+    lowerMessage.includes('score this idea') ||
+    lowerMessage.includes('should i build this') ||
+    lowerMessage.includes('check if this is viable')
+  ) {
+    return {
+      sopNumber: 1,
+      sopName: 'Quick Validation',
+      guidedPrompt: `## GUIDED MODE: Quick Validation (SOP-01)
+
+You are now guiding the user through validating their idea with a structured scoring system.
+
+### Scoring Framework (Total: 125 points)
+
+**Section 1: Problem Validation (Max 45 pts)**
+Guide them to search Reddit/Twitter for evidence of pain:
+- 3+ real complaints/requests: +15
+- Problem causes money/time loss: +10
+- People actively searching: +10
+- Recurring problem: +5
+- Personal pain: +5
+
+**Section 2: Market Validation (Max 35 pts)**
+Help them identify their target audience:
+- Clear, specific audience: +10
+- 2+ communities found: +10
+- Audience pays for software: +10
+- Direct access to audience: +5
+
+**Section 3: Monetization Validation (Max 45 pts)**
+Guide competitor research:
+- Competitors exist & charge: +15
+- Visible customers: +10
+- Exploitable gap: +10
+- Clear revenue path: +10
+
+### Decision Thresholds
+- 90-125: 🟢 GREEN LIGHT → Proceed to scope
+- 60-89: 🟡 YELLOW → Needs pivot or more research
+- <60: 🔴 RED → Kill the idea
+
+**Walk through each section methodically. Calculate scores as you go. Be honest about weak areas.**`
+    };
+  }
+  
+  // SOP-02: MVP Scope
+  if (
+    lowerMessage.includes('scope') ||
+    lowerMessage.includes('define the mvp') ||
+    lowerMessage.includes('what features') ||
+    lowerMessage.includes('lock the scope') ||
+    lowerMessage.includes('prevent scope creep') ||
+    lowerMessage.includes('mvp contract')
+  ) {
+    return {
+      sopNumber: 2,
+      sopName: 'MVP Scope Contract',
+      guidedPrompt: `## GUIDED MODE: MVP Scope Contract (SOP-02)
+
+You are now helping the user lock their MVP scope to prevent feature creep.
+
+### Step 1: Core Value Proposition
+Ask them to complete: "Users can __________ so that __________." (10 words max)
+
+### Step 2: Feature Brainstorm & Filter
+1. Have them list ALL potential features
+2. For each, ask: "Would someone pay for JUST this feature?"
+3. Categorize: P0 (must have), P1 (week 1 demand), P2 (nice to have), P3 (never)
+4. Lock ONLY P0 features - MAXIMUM 5
+
+### Step 3: Explicit Non-Goals
+Force them to list 5+ things they will NOT build:
+- No mobile app?
+- No team features?
+- No integrations?
+- No free tier?
+- No admin dashboard?
+
+### Step 4: Success Metrics
+Define specific, measurable targets:
+- First paying customer: Launch day
+- Revenue target: $X in 30 days
+- User target: X active users in 30 days
+
+### Step 5: Lock the Contract
+Compile everything into a formal contract they commit to.
+
+**Be ruthless about cutting features. The goal is LESS, not more. Flag any scope creep immediately.**`
+    };
+  }
+  
+  // SOP-03: Revenue Model
+  if (
+    lowerMessage.includes('pricing') ||
+    lowerMessage.includes('revenue model') ||
+    lowerMessage.includes('how much should i charge') ||
+    lowerMessage.includes('monetization') ||
+    lowerMessage.includes('payment') ||
+    lowerMessage.includes('lock pricing')
+  ) {
+    return {
+      sopNumber: 3,
+      sopName: 'Revenue Model Lock',
+      guidedPrompt: `## GUIDED MODE: Revenue Model Lock (SOP-03)
+
+You are now helping the user lock their revenue model before building.
+
+### Step 1: Choose Model Type
+Options:
+- Subscription ($X/month) - Best for ongoing value
+- One-time ($X lifetime) - Best for tools/utilities
+- Usage-based ($X/request) - Best for APIs
+- Freemium - AVOID in v1 (attracts freeloaders)
+
+### Step 2: Set Specific Price
+Use competitor research as anchors:
+- Hobby/indie: $9-29/month or $49-149 lifetime
+- Professional: $29-99/month
+- Business: $99-299/month
+
+Ask: "What are competitors charging? Price at or above them."
+
+### Step 3: Define Payment Flow
+Map the exact journey:
+1. How user discovers paywall
+2. What triggers payment
+3. Stripe Checkout vs embedded form
+4. What happens after payment
+
+### Step 4: Trial Decision
+- No trial: Filters to serious buyers
+- 7-day: Creates urgency
+- 14-day: Industry standard
+- Freemium: AVOID in v1
+
+### Step 5: Revenue Targets
+Calculate: Price × Customers Needed = Target Revenue
+Example: $29/mo × 18 customers = $500/month
+
+**Lock a specific number. No "around $20" - pick $19 or $29 and commit.**`
+    };
+  }
+  
+  // SOP-04: Design Brief
+  if (
+    lowerMessage.includes('design') ||
+    lowerMessage.includes('user flow') ||
+    lowerMessage.includes('screens') ||
+    lowerMessage.includes('landing page') ||
+    lowerMessage.includes('ui plan')
+  ) {
+    return {
+      sopNumber: 4,
+      sopName: 'Design Brief',
+      guidedPrompt: `## GUIDED MODE: Design Brief (SOP-04)
+
+You are now helping the user plan their UI before coding.
+
+### Step 1: Core User Flow
+Map the journey: ENTRY → HOOK → VALUE → CONVERT → SUCCESS
+Maximum 5 steps from landing to payment.
+
+### Step 2: Screen Inventory
+List every screen needed (max 7 for MVP):
+1. Landing Page - Convert visitors
+2. Auth - Sign in/up (Clerk handles this)
+3. Dashboard - Main workspace
+4. [Core Feature] - The ONE thing
+5. Settings - Account management
+6. Pricing/Upgrade - Convert free users
+
+### Step 3: Landing Page Structure
+- Hero: Headline (10 words), subheadline, CTA, visual
+- Social Proof: Logos, testimonials, or stats
+- Features: 3 max, with icons
+- Pricing: Clear display + CTA
+- Footer: Links, legal
+
+### Step 4: Component Checklist
+From shadcn/ui:
+- Button (primary, secondary, ghost)
+- Card, Input, Form
+- Toast, Dialog
+- Any specific components needed
+
+### Step 5: Key Interactions
+Document every click → response:
+- Form submit → Loading → Success toast
+- Error → Inline message
+- Async action → Progress indicator
+
+**Design mobile-first. Use shadcn/ui defaults before customizing.**`
+    };
+  }
+  
+  return null;
+}
 
 // ============================================
 // App Store - Main application state
@@ -383,9 +671,27 @@ export const useAppStore = create<AppState>((set, get) => ({
       // Get all messages for context
       const allMessages = [...get().messages];
 
-      // Build context-aware system prompt if we have a current project
+      // Detect if user is asking about a specific SOP workflow
+      const sopContext = detectSOPContext(content);
+
+      // Build context-aware system prompt
       let systemPrompt: string | null = null;
       const project = state.currentProject;
+      
+      // Base system prompt for guided workflows (no project context)
+      const baseGuidedPrompt = `You are an AI assistant integrated into Launchpad, a Micro-SaaS shipping framework.
+You help developers go from idea to revenue using a structured 13-step SOP (Standard Operating Procedure) system.
+
+The SOP Pipeline:
+- SOP-00 to 03: Ideation (Capture idea → Validate → Lock scope → Lock pricing)
+- SOP-04: Design (Plan UI before code)
+- SOP-05 to 06: Setup (Scaffold project → Provision infrastructure)
+- SOP-07 to 08: Build (Develop features → Test/QA)
+- SOP-09 to 10: Launch (Pre-ship checklist → Go live)
+- SOP-11 to 12: Post-Launch (Monitor → Market)
+
+You guide users through each phase with structured questions and checklists.
+Be conversational but action-oriented. Track progress and suggest next steps.`;
 
       if (project) {
         const analysis: ProjectAnalysis | null = project.status_report
@@ -445,6 +751,14 @@ ${roadmapStatus}
 - Suggest next steps based on the roadmap status
 - Be specific about what files to modify or create based on the project structure
 - When recommending actions, tie them to specific SOP items where relevant`;
+
+        // Inject SOP-specific guided prompt if detected
+        if (sopContext) {
+          systemPrompt += `\n\n${sopContext.guidedPrompt}`;
+        }
+      } else if (sopContext) {
+        // No project context, but user is asking about SOP workflow
+        systemPrompt = `${baseGuidedPrompt}\n\n${sopContext.guidedPrompt}`;
       }
 
       // Send to Claude API (with project path for file tools)
