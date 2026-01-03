@@ -2,8 +2,9 @@
 
 > System status tracker — what's built, what's pending.
 
-**Last Updated:** 2025-12-28
-**Version:** 0.7.0 (SOPs Complete)
+**Last Updated:** 2026-01-03
+**Version:** 1.0.0 (Production Ready)
+**Status:** ✅ COMPLETE
 
 ---
 
@@ -70,7 +71,7 @@
 ### Ideas Vault (`_vault/`)
 | File | Status | Notes |
 |------|--------|-------|
-| `IDEAS.md` | ⏳ Pending | 140 pre-validated ideas |
+| `IDEAS.md` | ✅ Complete | Centralized idea index (1 backlog idea) |
 
 ### Templates (`_templates/`)
 | File | Status | Notes |
@@ -79,7 +80,15 @@
 | `env/.env.local.template` | ✅ Complete | Developer setup template |
 | `docs/PRD.md` | ✅ Complete | Product requirements template |
 | `docs/PITCH.md` | ✅ Complete | One-pager pitch template |
-| `project/nextjs-web/` | 🔨 Scaffolded | Structure ready, implementation tomorrow |
+| `project/nextjs-web/` | ✅ Complete | Full Next.js template with auth, DB, webhooks, CI/CD, testing |
+
+### Agents (`_agents/`)
+| File | Status | Notes |
+|------|--------|-------|
+| `AGENTS_README.md` | ✅ Complete | Directory overview and usage |
+| `n8n/workflows/` | ✅ Complete | Workflow exports (empty, ready) |
+| `prompts/PROMPTS.md` | ✅ Complete | Reusable prompt templates |
+| `mcp/MCP.md` | ✅ Complete | MCP server configuration guide |
 
 ### Integrations (`_integrations/`)
 | File | Status | Notes |
@@ -91,26 +100,27 @@
 |------|--------|-------|
 | `directory-qco.ps1` | ✅ Complete | Quality control cleanup script |
 | `setup-hooks.ps1` | ✅ Complete | Configure git to use .githooks/ |
-| `new-project.ps1` | ⏳ Pending | |
-| `setup-env.ps1` | ⏳ Pending | |
-| `provision-db.ps1` | ⏳ Pending | |
+| `new-project.ps1` | ✅ Complete | Scaffold new project from template |
+| `setup-env.ps1` | ✅ Complete | Interactive environment variable setup |
+| `provision-db.ps1` | ✅ Complete | Provision Neon database with CLI |
 
 ---
 
 ## Progress Summary
 
 ```
-Priority 1: Core Files        [7/7]  ██████████ 100% ✅
-Priority 2: Governance        [5/5]  ██████████ 100% ✅
-Priority 3: Stack             [4/4]  ██████████ 100% ✅
-Priority 4: Design System     [9/9]  ██████████ 100% ✅
+Priority 1: Core Files        [7/7]   ██████████ 100% ✅
+Priority 2: Governance        [5/5]   ██████████ 100% ✅
+Priority 3: Stack             [4/4]   ██████████ 100% ✅
+Priority 4: Design System     [9/9]   ██████████ 100% ✅
 Priority 5: SOPs              [13/13] ██████████ 100% ✅
-Priority 6: Ideas Vault       [0/1]  ░░░░░░░░░░ 0%
-Priority 7: Templates         [4/5]  ████████░░ 80%
-Priority 8: Integrations      [1/1]  ██████████ 100% ✅
-Priority 9: Scripts           [2/5]  ████░░░░░░ 40%
+Priority 6: Ideas Vault       [1/1]   ██████████ 100% ✅
+Priority 7: Templates         [5/5]   ██████████ 100% ✅
+Priority 8: Integrations      [1/1]   ██████████ 100% ✅
+Priority 9: Scripts           [5/5]   ██████████ 100% ✅
+Priority 10: Agents           [4/4]   ██████████ 100% ✅
 
-Overall: 45/50 files (90%)
+Overall: 54/54 files (100%)
 ```
 
 ---
@@ -119,6 +129,15 @@ Overall: 45/50 files (90%)
 
 | Date | Change |
 |------|--------|
+| 2026-01-03 | Added CI/CD workflow and Vitest testing to nextjs-web template |
+| 2026-01-03 | Created _agents/ folder structure (prompts, n8n, mcp) |
+| 2026-01-03 | Fixed AGENTS.md Quick Routing to match actual SOP filenames |
+| 2026-01-03 | Updated Tool Integrations to point to consolidated INTEGRATIONS.md |
+| 2026-01-03 | Implemented nextjs-web template (18 files: layouts, pages, webhooks, DB, config) |
+| 2026-01-03 | Fixed README.md SOP table (updated to reflect 13 SOPs with correct names) |
+| 2026-01-03 | Created automation scripts: new-project.ps1, setup-env.ps1, provision-db.ps1 |
+| 2026-01-03 | Created IDEAS.md vault index with 1 backlog idea |
+| 2026-01-03 | Updated launchpad-app README.md with project-specific documentation |
 | 2025-12-28 | Rebuilt SOP system: 13 SOPs (00-12) with Universal SOP Framework |
 | 2025-12-28 | Scaffolded nextjs-web boilerplate (20+ files, ready for implementation) |
 | 2025-12-28 | Added PRD.md and PITCH.md doc templates |
