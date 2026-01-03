@@ -1,0 +1,600 @@
+{
+  "$schema": "./schema-types.ts",
+  "sopNumber": 1,
+  "name": "Quick Validation",
+  "description": "Validate problem, market, and monetization before building",
+  "phase": "ideation",
+  "estimatedDuration": "1-4 hours",
+  "prerequisites": {
+    "completedSops": [0],
+    "requiredArtifacts": ["idea"],
+    "requiredFields": ["ideaFile", "painDescription", "whoHasProblem"],
+    "conditions": [
+      {
+        "field": "ideaFile",
+        "operator": "exists",
+        "value": true
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "1.1",
+      "name": "Problem Validation - Reddit Research",
+      "type": "research",
+      "required": true,
+      "prompt": "Let's validate this problem is real. Search Reddit for people complaining about this problem. Look for subreddits where your target audience hangs out. Find at least 3 real posts/comments showing this pain.",
+      "instructions": [
+        "Search relevant subreddits for keywords related to the problem",
+        "Look for complaint posts, rants, 'Is there a tool for...' questions",
+        "Capture direct quotes that show real pain",
+        "Document the subreddit names for later marketing"
+      ],
+      "inputs": [
+        {
+          "field": "redditEvidence",
+          "label": "Reddit Evidence",
+          "type": "textarea",
+          "placeholder": "Paste links and quotes from Reddit posts...",
+          "helpText": "At least 3 examples of people experiencing this problem",
+          "validation": {
+            "required": true,
+            "minLength": 50
+          }
+        },
+        {
+          "field": "redditSubreddits",
+          "label": "Relevant Subreddits",
+          "type": "text",
+          "placeholder": "e.g., r/freelance, r/smallbusiness...",
+          "helpText": "Communities where target users gather"
+        }
+      ],
+      "outputField": "redditResearch"
+    },
+    {
+      "id": "1.2",
+      "name": "Problem Validation - Twitter/X Research",
+      "type": "research",
+      "required": true,
+      "prompt": "Now search Twitter/X for people asking for solutions or complaining about this problem. Look for 'Is there a tool that...', 'I wish there was...', or frustration tweets.",
+      "instructions": [
+        "Search Twitter for problem-related keywords",
+        "Look for solution requests and complaints",
+        "Note influencers or accounts in this space",
+        "Capture direct quotes"
+      ],
+      "inputs": [
+        {
+          "field": "twitterEvidence",
+          "label": "Twitter/X Evidence",
+          "type": "textarea",
+          "placeholder": "Paste links and quotes from tweets...",
+          "helpText": "Examples of people seeking solutions on Twitter",
+          "validation": {
+            "required": true,
+            "minLength": 30
+          }
+        }
+      ],
+      "outputField": "twitterResearch",
+      "dependsOn": ["1.1"]
+    },
+    {
+      "id": "1.3",
+      "name": "Problem Validation - Severity Rating",
+      "type": "decision",
+      "required": true,
+      "prompt": "Based on your research, how severe is this problem? Rate it from 1 (Mild Annoyance) to 5 (Hair on Fire).",
+      "instructions": [
+        "Consider: Does this problem cause money loss?",
+        "Consider: Is this a recurring problem or one-time?",
+        "Consider: How emotional are the complaints?",
+        "Be honest - don't inflate the rating"
+      ],
+      "inputs": [
+        {
+          "field": "problemSeverity",
+          "label": "Problem Severity (1-5)",
+          "type": "select",
+          "options": [
+            { "value": "1", "label": "1 - Mild annoyance" },
+            { "value": "2", "label": "2 - Noticeable friction" },
+            { "value": "3", "label": "3 - Real pain, workarounds exist" },
+            { "value": "4", "label": "4 - Significant pain, desperate for solutions" },
+            { "value": "5", "label": "5 - Hair on fire, will pay anything" }
+          ],
+          "validation": { "required": true }
+        }
+      ],
+      "scoring": [
+        {
+          "id": "evidence_found",
+          "description": "3+ real complaints/requests found",
+          "points": 15,
+          "evidenceType": "boolean"
+        },
+        {
+          "id": "causes_loss",
+          "description": "Problem causes money loss or time waste",
+          "points": 10,
+          "evidenceType": "boolean"
+        },
+        {
+          "id": "actively_searching",
+          "description": "People actively searching for solutions",
+          "points": 10,
+          "evidenceType": "boolean"
+        },
+        {
+          "id": "recurring",
+          "description": "Problem is recurring (not one-time)",
+          "points": 5,
+          "evidenceType": "boolean"
+        },
+        {
+          "id": "personal_pain",
+          "description": "You personally have this problem",
+          "points": 5,
+          "evidenceType": "boolean"
+        }
+      ],
+      "outputField": "problemValidation",
+      "dependsOn": ["1.1", "1.2"]
+    },
+    {
+      "id": "1.4",
+      "name": "Market Validation - Target Audience",
+      "type": "input",
+      "required": true,
+      "prompt": "Who exactly is your target audience? Be specific - 'small business owners' is too broad. Think 'solo freelance web developers who work with 3-5 clients at a time'.",
+      "instructions": [
+        "Be as specific as possible",
+        "One sentence that identifies WHO they are",
+        "Include context about their situation",
+        "This should match the people you found in research"
+      ],
+      "inputs": [
+        {
+          "field": "targetAudience",
+          "label": "Target Audience",
+          "type": "textarea",
+          "placeholder": "e.g., Solo freelance developers who struggle to manage client invoices...",
+          "helpText": "One specific sentence describing your ideal customer",
+          "validation": {
+            "required": true,
+            "minLength": 20,
+            "maxLength": 300
+          }
+        }
+      ],
+      "outputField": "targetAudience",
+      "dependsOn": ["1.3"]
+    },
+    {
+      "id": "1.5",
+      "name": "Market Validation - Communities",
+      "type": "research",
+      "required": true,
+      "prompt": "Where does your target audience hang out online? List at least 2 communities, forums, or platforms where you can reach them.",
+      "instructions": [
+        "Include subreddits from earlier research",
+        "Look for Discord servers, Slack communities",
+        "Consider niche forums, Facebook groups",
+        "Think about where they spend time professionally"
+      ],
+      "inputs": [
+        {
+          "field": "communities",
+          "label": "Communities",
+          "type": "textarea",
+          "placeholder": "List communities with links...\n- r/subreddit (link)\n- Discord server name\n- etc.",
+          "helpText": "At least 2 places where you can reach your audience",
+          "validation": {
+            "required": true,
+            "minLength": 30
+          }
+        },
+        {
+          "field": "communityCount",
+          "label": "Number of communities found",
+          "type": "number",
+          "validation": {
+            "required": true,
+            "min": 2
+          }
+        }
+      ],
+      "scoring": [
+        {
+          "id": "clear_audience",
+          "description": "Clear, specific audience identified",
+          "points": 10,
+          "evidenceType": "boolean"
+        },
+        {
+          "id": "communities_found",
+          "description": "2+ communities where they gather",
+          "points": 10,
+          "evidenceType": "boolean"
+        },
+        {
+          "id": "pays_for_software",
+          "description": "Audience already pays for software",
+          "points": 10,
+          "evidenceType": "boolean"
+        },
+        {
+          "id": "has_access",
+          "description": "You have access to this audience",
+          "points": 5,
+          "evidenceType": "boolean"
+        }
+      ],
+      "outputField": "marketValidation",
+      "dependsOn": ["1.4"]
+    },
+    {
+      "id": "1.6",
+      "name": "Market Validation - Size Estimate",
+      "type": "input",
+      "required": true,
+      "prompt": "Rough estimate: how many people have this problem? Even a ballpark helps. Consider: subreddit sizes, community members, industry stats.",
+      "instructions": [
+        "This doesn't need to be precise",
+        "Look at subreddit subscriber counts",
+        "Search for industry reports or stats",
+        "Even 'thousands' vs 'millions' is useful"
+      ],
+      "inputs": [
+        {
+          "field": "marketSizeEstimate",
+          "label": "Market Size Estimate",
+          "type": "select",
+          "options": [
+            { "value": "hundreds", "label": "Hundreds (niche)" },
+            { "value": "thousands", "label": "Thousands (small market)" },
+            { "value": "tens_of_thousands", "label": "Tens of thousands (good size)" },
+            { "value": "hundreds_of_thousands", "label": "Hundreds of thousands (large)" },
+            { "value": "millions", "label": "Millions (massive)" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "marketSizeReasoning",
+          "label": "How did you estimate this?",
+          "type": "textarea",
+          "placeholder": "Subreddit has X subscribers, industry report says Y...",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "marketSize",
+      "dependsOn": ["1.5"]
+    },
+    {
+      "id": "1.7",
+      "name": "Monetization Validation - Competitor Research",
+      "type": "research",
+      "required": true,
+      "prompt": "Find existing paid solutions (competitors). If people pay for alternatives, they'll pay for yours. Document at least 2 competitors with their pricing.",
+      "instructions": [
+        "Search Google, Product Hunt, G2, Capterra",
+        "Note their pricing models (subscription, one-time, freemium)",
+        "Document what they do well and poorly",
+        "If NO competitors exist, ask why - usually a bad sign"
+      ],
+      "inputs": [
+        {
+          "field": "competitors",
+          "label": "Competitors",
+          "type": "textarea",
+          "placeholder": "Competitor 1:\n- URL: \n- Pricing: \n- Strengths: \n- Weaknesses: \n\nCompetitor 2:\n...",
+          "helpText": "At least 2 competitors with pricing and analysis",
+          "validation": {
+            "required": true,
+            "minLength": 100
+          }
+        }
+      ],
+      "outputField": "competitorResearch",
+      "dependsOn": ["1.6"]
+    },
+    {
+      "id": "1.8",
+      "name": "Monetization Validation - Gap Analysis",
+      "type": "decision",
+      "required": true,
+      "prompt": "What gap in the market can you exploit? How would your solution be different or better than what exists?",
+      "instructions": [
+        "Identify a clear differentiator",
+        "Could be: simpler, cheaper, faster, better UX, specific niche",
+        "If you can't find a gap, reconsider the idea",
+        "The gap should be valuable to customers"
+      ],
+      "inputs": [
+        {
+          "field": "marketGap",
+          "label": "Market Gap / Differentiation",
+          "type": "textarea",
+          "placeholder": "Our solution would be different because...",
+          "helpText": "What's your unique angle?",
+          "validation": {
+            "required": true,
+            "minLength": 30
+          }
+        },
+        {
+          "field": "pricingEstimate",
+          "label": "Estimated Price Point",
+          "type": "text",
+          "placeholder": "e.g., $29/month, $99 one-time",
+          "helpText": "Based on competitor pricing, what could you charge?",
+          "validation": { "required": true }
+        }
+      ],
+      "scoring": [
+        {
+          "id": "competitors_charge",
+          "description": "Competitors exist and charge money",
+          "points": 15,
+          "evidenceType": "boolean"
+        },
+        {
+          "id": "visible_customers",
+          "description": "Competitors have visible customers",
+          "points": 10,
+          "evidenceType": "boolean"
+        },
+        {
+          "id": "market_gap",
+          "description": "Gap in market you can exploit",
+          "points": 10,
+          "evidenceType": "boolean"
+        },
+        {
+          "id": "clear_monetization",
+          "description": "Clear monetization path",
+          "points": 10,
+          "evidenceType": "boolean"
+        }
+      ],
+      "outputField": "monetizationValidation",
+      "dependsOn": ["1.7"]
+    },
+    {
+      "id": "1.9",
+      "name": "Calculate Total Score",
+      "type": "validation",
+      "required": true,
+      "prompt": "Let me calculate your validation score based on everything we've gathered...",
+      "instructions": [
+        "Sum up all scoring criteria that were met",
+        "Maximum possible: 125 points",
+        "90+ = GREEN LIGHT (proceed)",
+        "60-89 = YELLOW (needs more research)",
+        "Below 60 = RED (kill or pivot)"
+      ],
+      "inputs": [
+        {
+          "field": "problemScore",
+          "label": "Problem Validation Score (max 45)",
+          "type": "number",
+          "validation": { "required": true, "min": 0, "max": 45 }
+        },
+        {
+          "field": "marketScore",
+          "label": "Market Validation Score (max 35)",
+          "type": "number",
+          "validation": { "required": true, "min": 0, "max": 35 }
+        },
+        {
+          "field": "monetizationScore",
+          "label": "Monetization Validation Score (max 45)",
+          "type": "number",
+          "validation": { "required": true, "min": 0, "max": 45 }
+        }
+      ],
+      "outputField": "validationScore",
+      "dependsOn": ["1.3", "1.5", "1.8"]
+    },
+    {
+      "id": "1.10",
+      "name": "Make Decision",
+      "type": "decision",
+      "required": true,
+      "prompt": "Based on the validation score, here's the verdict. Score: {totalScore}/125",
+      "instructions": [
+        "90-125: GREEN LIGHT - Move to active, proceed to scope",
+        "60-89: YELLOW - Needs more research or pivoting",
+        "Below 60: RED - Kill it or move to killed folder"
+      ],
+      "inputs": [
+        {
+          "field": "decision",
+          "label": "Decision",
+          "type": "select",
+          "options": [
+            { "value": "green", "label": "GREEN LIGHT - Proceed to scope" },
+            { "value": "yellow", "label": "YELLOW - Needs more research" },
+            { "value": "red", "label": "RED - Kill this idea" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "decisionReasoning",
+          "label": "Reasoning",
+          "type": "textarea",
+          "placeholder": "Why this decision makes sense...",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "finalDecision",
+      "dependsOn": ["1.9"]
+    },
+    {
+      "id": "1.11",
+      "name": "Update Idea File",
+      "type": "generation",
+      "required": true,
+      "prompt": "I'll update your idea file with all the validation data and move it to the appropriate folder.",
+      "instructions": [
+        "Add validation score and breakdown to idea file",
+        "Document key findings (quotes, links, competitor URLs)",
+        "If GREEN: move to _vault/active/",
+        "If RED: move to _vault/killed/ with reason"
+      ],
+      "outputField": "updatedFile",
+      "dependsOn": ["1.10"]
+    }
+  ],
+  "scoring": {
+    "sections": [
+      {
+        "name": "Problem Validation",
+        "maxPoints": 45,
+        "criteria": [
+          { "id": "evidence_found", "description": "3+ real complaints/requests found", "points": 15, "evidenceType": "boolean" },
+          { "id": "causes_loss", "description": "Problem causes money loss or time waste", "points": 10, "evidenceType": "boolean" },
+          { "id": "actively_searching", "description": "People actively searching for solutions", "points": 10, "evidenceType": "boolean" },
+          { "id": "recurring", "description": "Problem is recurring (not one-time)", "points": 5, "evidenceType": "boolean" },
+          { "id": "personal_pain", "description": "You personally have this problem", "points": 5, "evidenceType": "boolean" }
+        ]
+      },
+      {
+        "name": "Market Validation",
+        "maxPoints": 35,
+        "criteria": [
+          { "id": "clear_audience", "description": "Clear, specific audience identified", "points": 10, "evidenceType": "boolean" },
+          { "id": "communities_found", "description": "2+ communities where they gather", "points": 10, "evidenceType": "boolean" },
+          { "id": "pays_for_software", "description": "Audience already pays for software", "points": 10, "evidenceType": "boolean" },
+          { "id": "has_access", "description": "You have access to this audience", "points": 5, "evidenceType": "boolean" }
+        ]
+      },
+      {
+        "name": "Monetization Validation",
+        "maxPoints": 45,
+        "criteria": [
+          { "id": "competitors_charge", "description": "Competitors exist and charge money", "points": 15, "evidenceType": "boolean" },
+          { "id": "visible_customers", "description": "Competitors have visible customers", "points": 10, "evidenceType": "boolean" },
+          { "id": "market_gap", "description": "Gap in market you can exploit", "points": 10, "evidenceType": "boolean" },
+          { "id": "clear_monetization", "description": "Clear monetization path", "points": 10, "evidenceType": "boolean" }
+        ]
+      }
+    ],
+    "maxTotal": 125,
+    "thresholds": {
+      "pass": 90,
+      "conditional": { "min": 60, "max": 89 },
+      "fail": 59
+    }
+  },
+  "artifacts": [],
+  "outputs": [
+    {
+      "name": "validationScore",
+      "type": "number",
+      "description": "Total validation score out of 125"
+    },
+    {
+      "name": "decision",
+      "type": "string",
+      "description": "GREEN, YELLOW, or RED decision"
+    },
+    {
+      "name": "researchEvidence",
+      "type": "object",
+      "description": "All collected research links and quotes"
+    },
+    {
+      "name": "competitorAnalysis",
+      "type": "object",
+      "description": "Competitor research with pricing"
+    }
+  ],
+  "qualityGates": [
+    {
+      "id": "score-calculated",
+      "description": "Used the rubric, not gut feeling",
+      "condition": {
+        "field": "validationScore",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Validation score must be calculated using the rubric"
+    },
+    {
+      "id": "evidence-documented",
+      "description": "Real links/quotes, not assumptions",
+      "condition": {
+        "field": "redditEvidence",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Must have documented evidence from research"
+    },
+    {
+      "id": "decision-made",
+      "description": "Clear GO/NO-GO, no maybes lingering",
+      "condition": {
+        "field": "decision",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Must make a clear decision (GREEN/YELLOW/RED)"
+    },
+    {
+      "id": "file-updated",
+      "description": "Idea file reflects validation findings",
+      "condition": {
+        "field": "updatedFile",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Idea file must be updated with validation data"
+    }
+  ],
+  "transition": {
+    "conditions": [
+      {
+        "field": "decision",
+        "operator": "eq",
+        "value": "green"
+      },
+      {
+        "field": "validationScore",
+        "operator": "gte",
+        "value": 90
+      }
+    ],
+    "nextSop": 2,
+    "failAction": "block",
+    "message": "Validation passed! Your idea scored {validationScore}/125. Ready to lock MVP scope."
+  },
+  "pitfalls": [
+    {
+      "issue": "Confirmation bias",
+      "fix": "Actively search for reasons it WON'T work"
+    },
+    {
+      "issue": "Skipping competitor research",
+      "fix": "If no competitors, ask why (usually bad sign)"
+    },
+    {
+      "issue": "Hypothetical customers",
+      "fix": "Find REAL people, not imaginary ones"
+    },
+    {
+      "issue": "Inflating scores",
+      "fix": "Have someone else review your scoring"
+    },
+    {
+      "issue": "Analysis paralysis",
+      "fix": "Time-box to 4 hours max, then decide"
+    }
+  ]
+}
+

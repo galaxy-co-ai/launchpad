@@ -37,6 +37,7 @@ interface NavItem {
 
 const mainNavItems: NavItem[] = [
   { href: "/", label: "Home", icon: Home },
+  { href: "/ideas", label: "Ideas", icon: Lightbulb },
   { href: "/sops", label: "SOPs", icon: ClipboardList },
 ];
 

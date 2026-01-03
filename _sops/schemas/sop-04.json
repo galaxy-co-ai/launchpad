@@ -1,0 +1,590 @@
+{
+  "$schema": "./schema-types.ts",
+  "sopNumber": 4,
+  "name": "Design Brief",
+  "description": "Plan user flows and UI before writing any code",
+  "phase": "design",
+  "estimatedDuration": "1-2 hours",
+  "prerequisites": {
+    "completedSops": [0, 1, 2, 3],
+    "requiredArtifacts": ["idea", "contract", "revenue"],
+    "requiredFields": ["contractFile", "revenueFile", "featureList", "price"],
+    "conditions": [
+      {
+        "field": "revenueFile",
+        "operator": "exists",
+        "value": true
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "4.1",
+      "name": "Map Core User Flow",
+      "type": "input",
+      "required": true,
+      "prompt": "Let's design the user experience. First, map the core user flow from entry to success. How does someone discover your product and achieve their goal?",
+      "instructions": [
+        "Start from: How does user discover this?",
+        "Map each step to reach core value",
+        "End at: User achieves goal (and pays)",
+        "Keep flow under 5 steps for MVP"
+      ],
+      "inputs": [
+        {
+          "field": "entryPoint",
+          "label": "ENTRY - How do they arrive?",
+          "type": "text",
+          "placeholder": "e.g., Lands on landing page from Twitter",
+          "validation": { "required": true }
+        },
+        {
+          "field": "hookPoint",
+          "label": "HOOK - What grabs attention? (3 seconds)",
+          "type": "text",
+          "placeholder": "e.g., Sees 'Write 10x faster' headline + demo",
+          "validation": { "required": true }
+        },
+        {
+          "field": "valuePoint",
+          "label": "VALUE - Core action that delivers value",
+          "type": "text",
+          "placeholder": "e.g., Tries free generation (1 sample)",
+          "validation": { "required": true }
+        },
+        {
+          "field": "convertPoint",
+          "label": "CONVERT - Payment/signup trigger",
+          "type": "text",
+          "placeholder": "e.g., Hits paywall for more generations",
+          "validation": { "required": true }
+        },
+        {
+          "field": "successPoint",
+          "label": "SUCCESS - User achieves their goal",
+          "type": "text",
+          "placeholder": "e.g., Pays, generates unlimited content",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "coreUserFlow"
+    },
+    {
+      "id": "4.2",
+      "name": "Define Key Screens",
+      "type": "input",
+      "required": true,
+      "prompt": "List every screen needed for MVP. Maximum 5-7 screens. Each screen should have ONE primary purpose.",
+      "instructions": [
+        "Landing page is almost always needed",
+        "Auth handled by Clerk components",
+        "Dashboard/main workspace for core feature",
+        "Settings for account management",
+        "Pricing/upgrade for conversion"
+      ],
+      "inputs": [
+        {
+          "field": "screen1",
+          "label": "Screen 1",
+          "type": "text",
+          "defaultValue": "Landing Page - Convert visitors - Click 'Get Started'",
+          "validation": { "required": true }
+        },
+        {
+          "field": "screen2",
+          "label": "Screen 2",
+          "type": "text",
+          "defaultValue": "Auth - Sign up/in - Create account (Clerk)",
+          "validation": { "required": true }
+        },
+        {
+          "field": "screen3",
+          "label": "Screen 3 (Main App)",
+          "type": "text",
+          "placeholder": "Dashboard - [Purpose] - [Primary Action]",
+          "validation": { "required": true }
+        },
+        {
+          "field": "screen4",
+          "label": "Screen 4 (optional)",
+          "type": "text",
+          "placeholder": "[Screen] - [Purpose] - [Action]"
+        },
+        {
+          "field": "screen5",
+          "label": "Screen 5 (optional)",
+          "type": "text",
+          "placeholder": "[Screen] - [Purpose] - [Action]"
+        },
+        {
+          "field": "screen6",
+          "label": "Screen 6 (optional)",
+          "type": "text",
+          "placeholder": "[Screen] - [Purpose] - [Action]"
+        },
+        {
+          "field": "screen7",
+          "label": "Screen 7 (optional)",
+          "type": "text",
+          "placeholder": "[Screen] - [Purpose] - [Action]"
+        }
+      ],
+      "validation": {
+        "minItems": 3,
+        "maxItems": 7,
+        "message": "Need at least 3 screens, maximum 7 for MVP"
+      },
+      "outputField": "screenInventory",
+      "dependsOn": ["4.1"]
+    },
+    {
+      "id": "4.3",
+      "name": "Design Landing Page Hero",
+      "type": "input",
+      "required": true,
+      "prompt": "Let's design the landing page hero section. This is what visitors see first - it needs to hook them in 3 seconds.",
+      "instructions": [
+        "Headline: 10 words max, benefit-focused",
+        "Subheadline: Explain what it does",
+        "CTA: Action-oriented button text",
+        "Visual: Screenshot, demo, or animation"
+      ],
+      "inputs": [
+        {
+          "field": "heroHeadline",
+          "label": "Headline (10 words max)",
+          "type": "text",
+          "placeholder": "e.g., Ship faster with AI-powered code reviews",
+          "validation": { "required": true, "maxLength": 80 }
+        },
+        {
+          "field": "heroSubheadline",
+          "label": "Subheadline",
+          "type": "text",
+          "placeholder": "e.g., Get instant feedback on your pull requests...",
+          "validation": { "required": true, "maxLength": 150 }
+        },
+        {
+          "field": "heroCta",
+          "label": "CTA Button Text",
+          "type": "text",
+          "placeholder": "e.g., Start Free, Get Started, Try Now",
+          "validation": { "required": true, "maxLength": 30 }
+        },
+        {
+          "field": "heroVisual",
+          "label": "Hero Visual Description",
+          "type": "textarea",
+          "placeholder": "e.g., Screenshot of main dashboard showing...",
+          "helpText": "What visual will appear next to the headline?",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "landingHero",
+      "dependsOn": ["4.2"]
+    },
+    {
+      "id": "4.4",
+      "name": "Design Landing Page Features",
+      "type": "input",
+      "required": true,
+      "prompt": "Define 3 key features to highlight on the landing page. Each needs an icon, headline, and one-line description.",
+      "instructions": [
+        "3 features maximum for MVP",
+        "Use Lucide icons only",
+        "Each feature = icon + headline + one line",
+        "Features should map to P0 from contract"
+      ],
+      "inputs": [
+        {
+          "field": "feature1Icon",
+          "label": "Feature 1 Icon (Lucide name)",
+          "type": "text",
+          "placeholder": "e.g., Zap, Sparkles, Shield",
+          "validation": { "required": true }
+        },
+        {
+          "field": "feature1Headline",
+          "label": "Feature 1 Headline",
+          "type": "text",
+          "validation": { "required": true }
+        },
+        {
+          "field": "feature1Description",
+          "label": "Feature 1 Description",
+          "type": "text",
+          "validation": { "required": true, "maxLength": 100 }
+        },
+        {
+          "field": "feature2Icon",
+          "label": "Feature 2 Icon (Lucide name)",
+          "type": "text",
+          "validation": { "required": true }
+        },
+        {
+          "field": "feature2Headline",
+          "label": "Feature 2 Headline",
+          "type": "text",
+          "validation": { "required": true }
+        },
+        {
+          "field": "feature2Description",
+          "label": "Feature 2 Description",
+          "type": "text",
+          "validation": { "required": true, "maxLength": 100 }
+        },
+        {
+          "field": "feature3Icon",
+          "label": "Feature 3 Icon (Lucide name)",
+          "type": "text",
+          "validation": { "required": true }
+        },
+        {
+          "field": "feature3Headline",
+          "label": "Feature 3 Headline",
+          "type": "text",
+          "validation": { "required": true }
+        },
+        {
+          "field": "feature3Description",
+          "label": "Feature 3 Description",
+          "type": "text",
+          "validation": { "required": true, "maxLength": 100 }
+        }
+      ],
+      "outputField": "landingFeatures",
+      "dependsOn": ["4.3"]
+    },
+    {
+      "id": "4.5",
+      "name": "Design Pricing Display",
+      "type": "input",
+      "required": true,
+      "prompt": "How will pricing be displayed on the landing page? Reference your locked revenue model.",
+      "instructions": [
+        "Pull price from revenue model",
+        "Show what's included",
+        "Clear CTA to purchase",
+        "Keep it simple - one price for v1"
+      ],
+      "inputs": [
+        {
+          "field": "pricingDisplay",
+          "label": "Pricing Display Style",
+          "type": "select",
+          "options": [
+            { "value": "single_card", "label": "Single pricing card" },
+            { "value": "comparison", "label": "Free vs Pro comparison" },
+            { "value": "simple_line", "label": "Simple inline price" },
+            { "value": "hidden_until_signup", "label": "Hidden until signup" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "pricingIncludes",
+          "label": "What's Included (bullet points)",
+          "type": "textarea",
+          "placeholder": "- Unlimited X\n- Feature Y\n- Priority support\n- etc.",
+          "validation": { "required": true }
+        },
+        {
+          "field": "pricingCta",
+          "label": "Pricing CTA Text",
+          "type": "text",
+          "placeholder": "e.g., Start Now, Get Access, Buy Now",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "pricingDesign",
+      "dependsOn": ["4.4"]
+    },
+    {
+      "id": "4.6",
+      "name": "Define Key Interactions",
+      "type": "input",
+      "required": true,
+      "prompt": "Let's define the key interactions. What happens when users click buttons, submit forms, or trigger actions?",
+      "instructions": [
+        "Every action needs feedback",
+        "Loading states for async actions",
+        "Success confirmations (toasts)",
+        "Error states with helpful messages"
+      ],
+      "inputs": [
+        {
+          "field": "coreInteraction",
+          "label": "Core Feature Interaction",
+          "type": "textarea",
+          "placeholder": "e.g., User clicks Generate → Loading spinner → Result appears → Success toast",
+          "helpText": "Describe the main feature interaction flow",
+          "validation": { "required": true }
+        },
+        {
+          "field": "formSubmitPattern",
+          "label": "Form Submit Pattern",
+          "type": "text",
+          "defaultValue": "Click submit → Loading state → Validation → Success toast or inline error",
+          "validation": { "required": true }
+        },
+        {
+          "field": "errorPattern",
+          "label": "Error Handling Pattern",
+          "type": "text",
+          "defaultValue": "Show inline error message + toast.error with friendly message",
+          "validation": { "required": true }
+        },
+        {
+          "field": "loadingPattern",
+          "label": "Loading State Pattern",
+          "type": "text",
+          "defaultValue": "Skeleton loaders for content, spinners for actions",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "interactions",
+      "dependsOn": ["4.5"]
+    },
+    {
+      "id": "4.7",
+      "name": "Select shadcn/ui Components",
+      "type": "checklist",
+      "required": true,
+      "prompt": "Which shadcn/ui components will you need? Check all that apply.",
+      "instructions": [
+        "Reference shadcn/ui docs",
+        "Start with essentials",
+        "Add more as needed during dev",
+        "These are starting components, not final list"
+      ],
+      "checklistItems": [
+        { "id": "button", "label": "Button (primary, secondary, ghost)", "required": true },
+        { "id": "card", "label": "Card", "required": false },
+        { "id": "input", "label": "Input", "required": true },
+        { "id": "form", "label": "Form (with react-hook-form)", "required": false },
+        { "id": "toast", "label": "Toast (notifications)", "required": true },
+        { "id": "dialog", "label": "Dialog (modals)", "required": false },
+        { "id": "dropdown", "label": "Dropdown Menu", "required": false },
+        { "id": "tabs", "label": "Tabs", "required": false },
+        { "id": "table", "label": "Table", "required": false },
+        { "id": "skeleton", "label": "Skeleton (loading states)", "required": true },
+        { "id": "avatar", "label": "Avatar", "required": false },
+        { "id": "badge", "label": "Badge", "required": false },
+        { "id": "separator", "label": "Separator", "required": false },
+        { "id": "sheet", "label": "Sheet (side panels)", "required": false },
+        { "id": "tooltip", "label": "Tooltip", "required": false }
+      ],
+      "outputField": "componentChecklist",
+      "dependsOn": ["4.6"]
+    },
+    {
+      "id": "4.8",
+      "name": "Confirm Responsive Strategy",
+      "type": "decision",
+      "required": true,
+      "prompt": "Confirm your responsive design strategy. Mobile-first is required.",
+      "instructions": [
+        "Mobile: 320px - 768px",
+        "Tablet: 768px - 1024px",
+        "Desktop: 1024px+",
+        "Design mobile first, then expand"
+      ],
+      "inputs": [
+        {
+          "field": "mobileFirst",
+          "label": "Confirm mobile-first approach",
+          "type": "boolean",
+          "defaultValue": true,
+          "validation": { "required": true }
+        },
+        {
+          "field": "breakpointNotes",
+          "label": "Any special breakpoint considerations?",
+          "type": "textarea",
+          "placeholder": "e.g., Dashboard needs sidebar on desktop only..."
+        }
+      ],
+      "outputField": "responsiveStrategy",
+      "dependsOn": ["4.7"]
+    },
+    {
+      "id": "4.9",
+      "name": "Document Design Decisions",
+      "type": "input",
+      "required": false,
+      "prompt": "Any other design decisions to document? Layout choices, color usage, special considerations?",
+      "instructions": [
+        "Document any non-obvious choices",
+        "Reference design system tokens",
+        "Note any deviations from defaults",
+        "This helps maintain consistency"
+      ],
+      "inputs": [
+        {
+          "field": "layoutChoice",
+          "label": "Layout Choice",
+          "type": "select",
+          "options": [
+            { "value": "single_column", "label": "Single column (simpler for MVP)" },
+            { "value": "sidebar", "label": "Sidebar + main content" },
+            { "value": "dashboard", "label": "Dashboard grid" },
+            { "value": "wizard", "label": "Multi-step wizard" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "additionalNotes",
+          "label": "Additional Design Notes",
+          "type": "textarea",
+          "placeholder": "Any other design decisions or considerations..."
+        }
+      ],
+      "outputField": "designDecisions",
+      "dependsOn": ["4.8"]
+    },
+    {
+      "id": "4.10",
+      "name": "Generate Design Brief",
+      "type": "generation",
+      "required": true,
+      "prompt": "I'll create your Design Brief document and save it to the vault.",
+      "instructions": [
+        "Generate DESIGN-{slug}.md in _vault/active/",
+        "Include user flow, screens, landing page structure",
+        "Reference design system",
+        "List all component requirements"
+      ],
+      "outputField": "designFile",
+      "dependsOn": ["4.9"]
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "design",
+      "filePattern": "DESIGN-{slug}.md",
+      "directory": "_vault/active",
+      "template": "# Design Brief: {productName}\n\n**Date:** {date}\n**Design System:** Reference `_design-system/DESIGN_SYSTEM.md`\n\n---\n\n## Core User Flow\n\n```\nENTRY → {entryPoint}\n  ↓\nHOOK → {hookPoint}\n  ↓\nVALUE → {valuePoint}\n  ↓\nCONVERT → {convertPoint}\n  ↓\nSUCCESS → {successPoint}\n```\n\n---\n\n## Screen Inventory\n\n| # | Screen | Purpose | Primary Action |\n|---|--------|---------|----------------|\n| 1 | {screen1} |\n| 2 | {screen2} |\n| 3 | {screen3} |\n| 4 | {screen4} |\n| 5 | {screen5} |\n| 6 | {screen6} |\n| 7 | {screen7} |\n\n---\n\n## Landing Page Structure\n\n### Hero\n- **Headline:** {heroHeadline}\n- **Subheadline:** {heroSubheadline}\n- **CTA:** {heroCta}\n- **Visual:** {heroVisual}\n\n### Features Section\n1. **{feature1Headline}** ({feature1Icon}): {feature1Description}\n2. **{feature2Headline}** ({feature2Icon}): {feature2Description}\n3. **{feature3Headline}** ({feature3Icon}): {feature3Description}\n\n### Pricing Section\n- Display: {pricingDisplay}\n- Includes:\n{pricingIncludes}\n- CTA: {pricingCta}\n\n---\n\n## Key Interactions\n\n| Element | Interaction | Feedback |\n|---------|-------------|----------|\n| Core Feature | {coreInteraction} |\n| Form Submit | {formSubmitPattern} |\n| Errors | {errorPattern} |\n| Loading | {loadingPattern} |\n\n---\n\n## Component Checklist (shadcn/ui)\n\nSelected components from checklist.\n\n---\n\n## Responsive Strategy\n\n- **Mobile-first:** Yes\n- **Breakpoints:** 320px → 768px → 1024px\n- **Notes:** {breakpointNotes}\n\n---\n\n## Design Decisions\n\n| Decision | Choice | Reasoning |\n|----------|--------|----------|\n| Layout | {layoutChoice} | MVP simplicity |\n\n**Additional Notes:**\n{additionalNotes}\n",
+      "requiredFields": [
+        "entryPoint",
+        "hookPoint",
+        "valuePoint",
+        "heroHeadline",
+        "heroCta",
+        "feature1Headline"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "designFile",
+      "type": "file",
+      "description": "Design brief saved to vault",
+      "location": "_vault/active/DESIGN-{slug}.md"
+    },
+    {
+      "name": "userFlow",
+      "type": "object",
+      "description": "Core user flow diagram"
+    },
+    {
+      "name": "screenList",
+      "type": "array",
+      "description": "All MVP screens"
+    },
+    {
+      "name": "componentList",
+      "type": "array",
+      "description": "Required shadcn components"
+    }
+  ],
+  "qualityGates": [
+    {
+      "id": "flow-defined",
+      "description": "Clear path from landing to paid conversion",
+      "condition": {
+        "field": "convertPoint",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "User flow must include conversion point"
+    },
+    {
+      "id": "screens-listed",
+      "description": "Every screen needed is identified",
+      "condition": {
+        "field": "screen3",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Must list at least 3 screens"
+    },
+    {
+      "id": "components-chosen",
+      "description": "Know which shadcn/ui components to use",
+      "condition": {
+        "field": "componentChecklist",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Must select required components"
+    },
+    {
+      "id": "landing-planned",
+      "description": "Hero, features, pricing planned",
+      "condition": {
+        "field": "heroHeadline",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Landing page must be designed"
+    },
+    {
+      "id": "document-saved",
+      "description": "Design brief in vault",
+      "condition": {
+        "field": "designFile",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Design brief must be saved to vault"
+    }
+  ],
+  "transition": {
+    "conditions": [
+      {
+        "field": "designFile",
+        "operator": "exists",
+        "value": true
+      }
+    ],
+    "nextSop": 5,
+    "message": "Design brief complete! You now have IDEA, CONTRACT, REVENUE, and DESIGN docs. Ready to set up the project."
+  },
+  "pitfalls": [
+    {
+      "issue": "Too many screens",
+      "fix": "Hard cap at 7 screens for MVP"
+    },
+    {
+      "issue": "No mobile consideration",
+      "fix": "Start mobile, expand up"
+    },
+    {
+      "issue": "Custom components",
+      "fix": "Use shadcn/ui defaults first"
+    },
+    {
+      "issue": "Vague interactions",
+      "fix": "Document every click → response"
+    },
+    {
+      "issue": "Skipping landing page",
+      "fix": "Landing page IS the product for visitors"
+    }
+  ]
+}
+

@@ -1,0 +1,579 @@
+{
+  "$schema": "./schema-types.ts",
+  "sopNumber": 3,
+  "name": "Revenue Model Lock",
+  "description": "Define exactly how this product makes its first dollar",
+  "phase": "ideation",
+  "estimatedDuration": "30-45 minutes",
+  "prerequisites": {
+    "completedSops": [0, 1, 2],
+    "requiredArtifacts": ["idea", "contract"],
+    "requiredFields": ["contractFile", "featureList", "pricePoint"],
+    "conditions": [
+      {
+        "field": "contractFile",
+        "operator": "exists",
+        "value": true
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "3.1",
+      "name": "Choose Revenue Model Type",
+      "type": "decision",
+      "required": true,
+      "prompt": "Let's lock in how you'll make money. Choose ONE primary revenue model. Keep it simple for v1 - don't mix models.",
+      "instructions": [
+        "Select only ONE model",
+        "Subscription works for ongoing value",
+        "One-time purchase works for tools/utilities",
+        "Avoid freemium in v1 (attracts freeloaders)"
+      ],
+      "inputs": [
+        {
+          "field": "revenueModel",
+          "label": "Revenue Model",
+          "type": "select",
+          "options": [
+            { "value": "subscription_monthly", "label": "Subscription (Monthly)" },
+            { "value": "subscription_annual", "label": "Subscription (Annual)" },
+            { "value": "subscription_both", "label": "Subscription (Monthly + Annual discount)" },
+            { "value": "one_time", "label": "One-time Purchase (Lifetime)" },
+            { "value": "usage_based", "label": "Usage-based (Pay per use)" },
+            { "value": "credits", "label": "Credits System (Buy credits, spend on usage)" },
+            { "value": "freemium", "label": "Freemium (Free tier + Paid upgrade)" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "modelReasoning",
+          "label": "Why this model?",
+          "type": "textarea",
+          "placeholder": "This model fits because...",
+          "helpText": "Explain why this model matches your product's value delivery",
+          "validation": { "required": true, "minLength": 20 }
+        }
+      ],
+      "outputField": "revenueModel"
+    },
+    {
+      "id": "3.2",
+      "name": "Set Specific Price",
+      "type": "input",
+      "required": true,
+      "prompt": "Now set your exact price. Reference your competitor research. Price based on value delivered, not cost. Start higher than you think - you can always discount.",
+      "instructions": [
+        "Pick a specific number, not a range",
+        "Don't undercut competitors significantly",
+        "Consider what pain you're solving in dollar terms",
+        "One price is better than tiers for v1"
+      ],
+      "inputs": [
+        {
+          "field": "price",
+          "label": "Price",
+          "type": "number",
+          "placeholder": "e.g., 29",
+          "helpText": "The actual dollar amount",
+          "validation": { "required": true, "min": 1 }
+        },
+        {
+          "field": "pricePeriod",
+          "label": "Period",
+          "type": "select",
+          "options": [
+            { "value": "month", "label": "Per Month" },
+            { "value": "year", "label": "Per Year" },
+            { "value": "lifetime", "label": "One-time (Lifetime)" },
+            { "value": "per_use", "label": "Per Use/Credit" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "annualDiscount",
+          "label": "Annual Discount % (if offering both)",
+          "type": "number",
+          "placeholder": "e.g., 20",
+          "helpText": "Leave blank if not offering annual pricing"
+        }
+      ],
+      "outputField": "pricing",
+      "dependsOn": ["3.1"]
+    },
+    {
+      "id": "3.3",
+      "name": "Justify Pricing",
+      "type": "input",
+      "required": true,
+      "prompt": "Let's document why this price is right. Reference competitor pricing and the value you're delivering.",
+      "instructions": [
+        "Compare to at least 2 competitors",
+        "Calculate value delivered (hours saved, money made)",
+        "Position: premium, mid-market, or budget",
+        "If you can't justify it, reconsider"
+      ],
+      "inputs": [
+        {
+          "field": "competitorA",
+          "label": "Competitor A Price",
+          "type": "text",
+          "placeholder": "e.g., Competitor X charges $49/month",
+          "validation": { "required": true }
+        },
+        {
+          "field": "competitorB",
+          "label": "Competitor B Price",
+          "type": "text",
+          "placeholder": "e.g., Competitor Y charges $29/month",
+          "validation": { "required": true }
+        },
+        {
+          "field": "positioning",
+          "label": "Your Positioning",
+          "type": "select",
+          "options": [
+            { "value": "premium", "label": "Premium (Higher than competitors)" },
+            { "value": "mid_market", "label": "Mid-market (Similar to competitors)" },
+            { "value": "budget", "label": "Budget (Lower than competitors)" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "valueDelivered",
+          "label": "Value Delivered",
+          "type": "textarea",
+          "placeholder": "e.g., Saves 5 hours/month worth $100+ to target customer...",
+          "helpText": "Quantify the value if possible",
+          "validation": { "required": true, "minLength": 20 }
+        }
+      ],
+      "outputField": "pricingJustification",
+      "dependsOn": ["3.2"]
+    },
+    {
+      "id": "3.4",
+      "name": "Define Trial Strategy",
+      "type": "decision",
+      "required": true,
+      "prompt": "Will you offer a trial? And what kind? Trials can boost conversion but also attract tire-kickers.",
+      "instructions": [
+        "No trial filters to serious buyers",
+        "7-day trial creates urgency",
+        "14-day is industry standard for SaaS",
+        "Freemium is different from trial (covered if you chose that model)"
+      ],
+      "inputs": [
+        {
+          "field": "trialType",
+          "label": "Trial Type",
+          "type": "select",
+          "options": [
+            { "value": "none", "label": "No trial (pay upfront)" },
+            { "value": "7_day", "label": "7-day free trial" },
+            { "value": "14_day", "label": "14-day free trial" },
+            { "value": "limited_free", "label": "Limited free usage (then paywall)" },
+            { "value": "money_back", "label": "No trial, but X-day money-back guarantee" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "trialReasoning",
+          "label": "Why this trial strategy?",
+          "type": "textarea",
+          "placeholder": "This works because...",
+          "validation": { "required": true, "minLength": 20 }
+        }
+      ],
+      "outputField": "trialStrategy",
+      "dependsOn": ["3.3"]
+    },
+    {
+      "id": "3.5",
+      "name": "Map Payment Flow",
+      "type": "input",
+      "required": true,
+      "prompt": "Let's map the exact purchase journey. How does a user go from visiting to paying?",
+      "instructions": [
+        "Be specific about each step",
+        "Know where the paywall triggers",
+        "Stripe Checkout is the default for our stack",
+        "Receipt via Stripe automatic email is fine for MVP"
+      ],
+      "inputs": [
+        {
+          "field": "entryPoint",
+          "label": "Entry Point",
+          "type": "select",
+          "options": [
+            { "value": "landing_page", "label": "Landing page" },
+            { "value": "app_direct", "label": "Direct to app" },
+            { "value": "product_hunt", "label": "Product Hunt" },
+            { "value": "referral", "label": "Referral link" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "paywallTrigger",
+          "label": "What triggers the paywall?",
+          "type": "text",
+          "placeholder": "e.g., After 3 free uses, on signup, when accessing premium feature...",
+          "validation": { "required": true }
+        },
+        {
+          "field": "ctaText",
+          "label": "CTA Button Text",
+          "type": "text",
+          "placeholder": "e.g., Start Free Trial, Get Started, Buy Now",
+          "validation": { "required": true }
+        },
+        {
+          "field": "paymentMethod",
+          "label": "Payment Method",
+          "type": "select",
+          "options": [
+            { "value": "stripe_checkout", "label": "Stripe Checkout (redirect)" },
+            { "value": "stripe_embedded", "label": "Stripe Embedded (in-app)" },
+            { "value": "stripe_link", "label": "Stripe Payment Link" }
+          ],
+          "defaultValue": "stripe_checkout",
+          "validation": { "required": true }
+        },
+        {
+          "field": "accessGrant",
+          "label": "When is access granted?",
+          "type": "select",
+          "options": [
+            { "value": "immediate", "label": "Immediately after payment" },
+            { "value": "email_confirm", "label": "After email confirmation" },
+            { "value": "manual", "label": "Manual provisioning" }
+          ],
+          "defaultValue": "immediate",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "paymentFlow",
+      "dependsOn": ["3.4"]
+    },
+    {
+      "id": "3.6",
+      "name": "Set Refund Policy",
+      "type": "decision",
+      "required": true,
+      "prompt": "What's your refund policy? Having a clear policy builds trust and reduces disputes.",
+      "instructions": [
+        "7-day money-back is a safe default",
+        "No refunds is fine for cheap products",
+        "Longer refund period = more trust but more abuse potential",
+        "Be clear and upfront about policy"
+      ],
+      "inputs": [
+        {
+          "field": "refundPolicy",
+          "label": "Refund Policy",
+          "type": "select",
+          "options": [
+            { "value": "no_refunds", "label": "No refunds" },
+            { "value": "7_day", "label": "7-day money-back guarantee" },
+            { "value": "14_day", "label": "14-day money-back guarantee" },
+            { "value": "30_day", "label": "30-day money-back guarantee" },
+            { "value": "prorated", "label": "Pro-rated refunds anytime" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "refundConditions",
+          "label": "Any conditions?",
+          "type": "text",
+          "placeholder": "e.g., No questions asked, requires reason, etc.",
+          "defaultValue": "No questions asked"
+        }
+      ],
+      "outputField": "refundPolicy",
+      "dependsOn": ["3.5"]
+    },
+    {
+      "id": "3.7",
+      "name": "Set Revenue Targets",
+      "type": "input",
+      "required": true,
+      "prompt": "Let's set specific revenue targets with customer math. This grounds your expectations in reality.",
+      "instructions": [
+        "Use the pricing you just set",
+        "Calculate customers needed for each target",
+        "Be realistic but ambitious",
+        "These numbers hold you accountable"
+      ],
+      "inputs": [
+        {
+          "field": "launchDayRevenue",
+          "label": "Launch Day Revenue Target ($)",
+          "type": "number",
+          "placeholder": "e.g., 29",
+          "validation": { "required": true, "min": 0 }
+        },
+        {
+          "field": "thirtyDayRevenue",
+          "label": "30-Day Revenue Target ($)",
+          "type": "number",
+          "placeholder": "e.g., 500",
+          "validation": { "required": true, "min": 0 }
+        },
+        {
+          "field": "ninetyDayRevenue",
+          "label": "90-Day Revenue Target ($)",
+          "type": "number",
+          "placeholder": "e.g., 2000",
+          "validation": { "required": true, "min": 0 }
+        }
+      ],
+      "outputField": "revenueTargets",
+      "dependsOn": ["3.6"]
+    },
+    {
+      "id": "3.8",
+      "name": "Calculate Customer Math",
+      "type": "validation",
+      "required": true,
+      "prompt": "Let me calculate how many customers you need to hit each target...",
+      "instructions": [
+        "Customers needed = Revenue target ÷ Price",
+        "This is a reality check",
+        "If numbers seem impossible, revisit pricing or targets",
+        "Document the math for reference"
+      ],
+      "inputs": [
+        {
+          "field": "launchDayCustomers",
+          "label": "Customers needed (Launch Day)",
+          "type": "number",
+          "validation": { "required": true }
+        },
+        {
+          "field": "thirtyDayCustomers",
+          "label": "Customers needed (30 days)",
+          "type": "number",
+          "validation": { "required": true }
+        },
+        {
+          "field": "ninetyDayCustomers",
+          "label": "Customers needed (90 days)",
+          "type": "number",
+          "validation": { "required": true }
+        },
+        {
+          "field": "customerMathRealistic",
+          "label": "These numbers feel realistic",
+          "type": "boolean",
+          "helpText": "If not, go back and adjust pricing or targets",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "customerMath",
+      "dependsOn": ["3.7"]
+    },
+    {
+      "id": "3.9",
+      "name": "Stripe Setup Checklist",
+      "type": "checklist",
+      "required": false,
+      "prompt": "Here's what you'll need to set up in Stripe. You don't need to do this now, but acknowledge the checklist.",
+      "instructions": [
+        "Product created in Stripe dashboard",
+        "Price created with correct amount and interval",
+        "Checkout link or embedded form ready",
+        "Webhook endpoint for payment events",
+        "Test mode purchase verified"
+      ],
+      "checklistItems": [
+        { "id": "stripe_product", "label": "Product created in Stripe", "required": true },
+        { "id": "stripe_price", "label": "Price created in Stripe", "required": true },
+        { "id": "stripe_checkout", "label": "Checkout link generated", "required": true },
+        { "id": "stripe_webhook", "label": "Webhook endpoint configured", "required": true },
+        { "id": "stripe_test", "label": "Test mode purchase verified", "required": true }
+      ],
+      "outputField": "stripeChecklist",
+      "dependsOn": ["3.8"]
+    },
+    {
+      "id": "3.10",
+      "name": "Lock Revenue Model",
+      "type": "decision",
+      "required": true,
+      "prompt": "Ready to lock this in? Once locked, the pricing and model are set - no second-guessing during development.",
+      "instructions": [
+        "This is a commitment",
+        "You can change later, but not during build",
+        "Second-guessing pricing kills momentum",
+        "Trust your research"
+      ],
+      "inputs": [
+        {
+          "field": "pricingLocked",
+          "label": "Pricing locked - no second-guessing",
+          "type": "boolean",
+          "validation": { "required": true }
+        },
+        {
+          "field": "paymentFlowLocked",
+          "label": "Payment flow defined - build exactly this",
+          "type": "boolean",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "revenueModelLocked",
+      "dependsOn": ["3.9"]
+    },
+    {
+      "id": "3.11",
+      "name": "Generate Revenue Model Document",
+      "type": "generation",
+      "required": true,
+      "prompt": "I'll create your Revenue Model document and save it to the vault.",
+      "instructions": [
+        "Generate REVENUE-{slug}.md in _vault/active/",
+        "Include all pricing, flow, and target details",
+        "Set status to LOCKED",
+        "Add lock date"
+      ],
+      "outputField": "revenueFile",
+      "dependsOn": ["3.10"]
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "revenue",
+      "filePattern": "REVENUE-{slug}.md",
+      "directory": "_vault/active",
+      "template": "# Revenue Model: {productName}\n\n**Date:** {date}\n**Status:** LOCKED\n\n---\n\n## Model Type\n\n**Selected Model:** {revenueModel}\n**Reasoning:** {modelReasoning}\n\n---\n\n## Pricing\n\n**Price Point:** ${price} / {pricePeriod}\n\n**Justification:**\n- Competitor A charges: {competitorA}\n- Competitor B charges: {competitorB}\n- Our positioning: {positioning}\n- Value delivered: {valueDelivered}\n\n---\n\n## Trial Strategy\n\n**Trial Type:** {trialType}\n**Reasoning:** {trialReasoning}\n\n---\n\n## Payment Flow\n\n1. User arrives via: {entryPoint}\n2. Paywall triggers: {paywallTrigger}\n3. User clicks: \"{ctaText}\"\n4. Payment via: {paymentMethod}\n5. Access granted: {accessGrant}\n6. Receipt: Stripe automatic email\n\n**Refund Policy:** {refundPolicy}\n**Conditions:** {refundConditions}\n\n---\n\n## Revenue Targets\n\n| Timeframe | Revenue Target | Customers Needed |\n|-----------|----------------|-----------------|\n| Launch day | ${launchDayRevenue} | {launchDayCustomers} |\n| 30 days | ${thirtyDayRevenue} | {thirtyDayCustomers} |\n| 90 days | ${ninetyDayRevenue} | {ninetyDayCustomers} |\n\n**Price:** ${price}/{pricePeriod}\n**Customer Math:** Targets calculated based on price point\n\n---\n\n## Stripe Setup Checklist\n\n- [ ] Product created in Stripe\n- [ ] Price created in Stripe\n- [ ] Checkout link generated\n- [ ] Webhook endpoint configured\n- [ ] Test mode purchase verified\n\n---\n\n## Signatures\n\n- [x] Pricing locked—no second-guessing\n- [x] Payment flow defined—build exactly this\n\n**Lock Date:** {date}\n",
+      "requiredFields": [
+        "revenueModel",
+        "price",
+        "pricePeriod",
+        "trialType",
+        "paywallTrigger",
+        "refundPolicy",
+        "thirtyDayRevenue"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "revenueFile",
+      "type": "file",
+      "description": "Revenue model document saved to vault",
+      "location": "_vault/active/REVENUE-{slug}.md"
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "description": "Locked price point"
+    },
+    {
+      "name": "revenueModel",
+      "type": "string",
+      "description": "Selected revenue model type"
+    },
+    {
+      "name": "paymentFlow",
+      "type": "object",
+      "description": "Complete payment flow details"
+    }
+  ],
+  "qualityGates": [
+    {
+      "id": "model-selected",
+      "description": "One clear revenue model chosen",
+      "condition": {
+        "field": "revenueModel",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Must select a revenue model"
+    },
+    {
+      "id": "price-set",
+      "description": "Specific dollar amount locked",
+      "condition": {
+        "field": "price",
+        "operator": "gt",
+        "value": 0
+      },
+      "required": true,
+      "errorMessage": "Must set a specific price (not a range)"
+    },
+    {
+      "id": "flow-documented",
+      "description": "Know exactly how users pay",
+      "condition": {
+        "field": "paymentMethod",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Payment flow must be documented"
+    },
+    {
+      "id": "targets-defined",
+      "description": "Revenue goals with customer math",
+      "condition": {
+        "field": "thirtyDayCustomers",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Revenue targets with customer math required"
+    },
+    {
+      "id": "document-saved",
+      "description": "Revenue model file exists in vault",
+      "condition": {
+        "field": "revenueFile",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Revenue model document must be saved to vault"
+    }
+  ],
+  "transition": {
+    "conditions": [
+      {
+        "field": "revenueFile",
+        "operator": "exists",
+        "value": true
+      },
+      {
+        "field": "pricingLocked",
+        "operator": "eq",
+        "value": true
+      }
+    ],
+    "nextSop": 4,
+    "message": "Revenue model locked! ${price}/{pricePeriod} with {trialType}. Now let's design the user experience."
+  },
+  "pitfalls": [
+    {
+      "issue": "Pricing too low",
+      "fix": "Look at competitors, match or exceed"
+    },
+    {
+      "issue": "'Free first' mentality",
+      "fix": "Free users ≠ validation; charge from day 1"
+    },
+    {
+      "issue": "Complex tiers",
+      "fix": "One price in v1, tiers come later"
+    },
+    {
+      "issue": "No refund policy",
+      "fix": "Decide now: 7-day refund is safe default"
+    },
+    {
+      "issue": "Vague targets",
+      "fix": "Specific numbers force accountability"
+    }
+  ]
+}
+

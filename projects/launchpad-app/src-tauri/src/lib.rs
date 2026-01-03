@@ -15,6 +15,8 @@ use commands::{
     // Chat
     list_conversations, get_conversation_messages, create_conversation,
     save_message, delete_conversation, send_chat_message,
+    list_idea_conversations, create_conversation_with_idea, link_conversation_to_idea,
+    save_session_summary, get_conversation_with_context,
     // Analyzer
     analyze_project, save_project_analysis,
     // File Tools
@@ -23,6 +25,12 @@ use commands::{
     list_ideas, get_idea, create_idea, update_idea_status, save_idea_audit, delete_idea,
     // SOPs
     list_sops, get_sop, create_sop_version, archive_sop_version, get_sop_versions, init_default_sops,
+    // Artifacts
+    create_idea_file, update_idea_file, create_contract_file, create_revenue_file,
+    create_design_file, move_idea_file, list_vault_artifacts,
+    // Workflow
+    start_workflow, get_workflow_state, complete_step, advance_sop, update_validation,
+    get_workflow_context, add_workflow_artifact, list_workflows, delete_workflow, generate_ai_context,
 };
 use db::Database;
 
@@ -121,6 +129,11 @@ pub fn run() {
             save_message,
             delete_conversation,
             send_chat_message,
+            list_idea_conversations,
+            create_conversation_with_idea,
+            link_conversation_to_idea,
+            save_session_summary,
+            get_conversation_with_context,
             // Analyzer
             analyze_project,
             save_project_analysis,
@@ -143,6 +156,25 @@ pub fn run() {
             archive_sop_version,
             get_sop_versions,
             init_default_sops,
+            // Artifacts
+            create_idea_file,
+            update_idea_file,
+            create_contract_file,
+            create_revenue_file,
+            create_design_file,
+            move_idea_file,
+            list_vault_artifacts,
+            // Workflow
+            start_workflow,
+            get_workflow_state,
+            complete_step,
+            advance_sop,
+            update_validation,
+            get_workflow_context,
+            add_workflow_artifact,
+            list_workflows,
+            delete_workflow,
+            generate_ai_context,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

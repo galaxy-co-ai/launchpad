@@ -1,0 +1,423 @@
+{
+  "$schema": "./schema-types.ts",
+  "sopNumber": 0,
+  "name": "Idea Intake",
+  "description": "Capture and catalog ideas systematically into the vault",
+  "phase": "ideation",
+  "estimatedDuration": "5-15 minutes",
+  "prerequisites": {
+    "completedSops": [],
+    "requiredArtifacts": [],
+    "requiredFields": [],
+    "conditions": []
+  },
+  "steps": [
+    {
+      "id": "0.1",
+      "name": "Quick Capture",
+      "type": "input",
+      "required": true,
+      "prompt": "Let's capture your idea! Tell me: What problem have you noticed, or what solution are you thinking about? Also, where did this idea come from?",
+      "instructions": [
+        "Get the raw idea in one sentence (problem or solution framing)",
+        "Capture the source (where the idea came from)",
+        "Don't wait - ideas decay quickly",
+        "Accept rough/incomplete ideas - they'll be refined later"
+      ],
+      "inputs": [
+        {
+          "field": "rawIdea",
+          "label": "Raw Idea",
+          "type": "textarea",
+          "placeholder": "Describe your idea in one sentence...",
+          "helpText": "Can be problem-focused or solution-focused",
+          "validation": {
+            "required": true,
+            "minLength": 10,
+            "maxLength": 500,
+            "message": "Please provide a brief description of your idea"
+          }
+        },
+        {
+          "field": "source",
+          "label": "Source",
+          "type": "select",
+          "placeholder": "Where did this idea come from?",
+          "helpText": "Helps track pattern of where good ideas originate",
+          "options": [
+            { "value": "personal_pain", "label": "Personal pain point" },
+            { "value": "customer_feedback", "label": "Customer feedback" },
+            { "value": "competitor_gap", "label": "Competitor gap analysis" },
+            { "value": "market_research", "label": "Market research" },
+            { "value": "social_media", "label": "Social media (Reddit, Twitter, etc.)" },
+            { "value": "conversation", "label": "Conversation with someone" },
+            { "value": "random_thought", "label": "Random thought" },
+            { "value": "other", "label": "Other" }
+          ],
+          "validation": {
+            "required": true
+          }
+        },
+        {
+          "field": "sourceDetails",
+          "label": "Source Details",
+          "type": "text",
+          "placeholder": "Any specific details about the source?",
+          "helpText": "Optional: link, person's name, subreddit, etc."
+        }
+      ],
+      "outputField": "quickCapture"
+    },
+    {
+      "id": "0.2",
+      "name": "Problem Statement",
+      "type": "input",
+      "required": true,
+      "prompt": "Now let's clarify the problem. Who has this problem? What pain does it cause them? How do they currently try to solve it?",
+      "instructions": [
+        "Focus on the PROBLEM, not the solution",
+        "Identify a specific person/role who has this problem",
+        "Quantify the pain if possible (time wasted, money lost)",
+        "Understand current workarounds"
+      ],
+      "inputs": [
+        {
+          "field": "whoHasProblem",
+          "label": "Who has this problem?",
+          "type": "text",
+          "placeholder": "e.g., Freelance developers, small business owners...",
+          "helpText": "Be specific about the target persona",
+          "validation": {
+            "required": true,
+            "minLength": 5
+          }
+        },
+        {
+          "field": "painDescription",
+          "label": "What pain does it cause?",
+          "type": "textarea",
+          "placeholder": "Describe the frustration, time waste, or money loss...",
+          "helpText": "The more specific, the better",
+          "validation": {
+            "required": true,
+            "minLength": 20
+          }
+        },
+        {
+          "field": "currentSolution",
+          "label": "How do they currently solve it?",
+          "type": "textarea",
+          "placeholder": "Manual process, existing tool, workaround...",
+          "helpText": "Understanding alternatives helps position your solution",
+          "validation": {
+            "required": true,
+            "minLength": 10
+          }
+        }
+      ],
+      "outputField": "problemStatement",
+      "dependsOn": ["0.1"]
+    },
+    {
+      "id": "0.3",
+      "name": "Proposed Solution",
+      "type": "input",
+      "required": true,
+      "prompt": "What would you build to solve this problem? Keep it to one paragraph - we'll refine this later.",
+      "instructions": [
+        "Keep it high-level",
+        "One paragraph maximum",
+        "Focus on the core value, not features",
+        "Don't over-engineer at this stage"
+      ],
+      "inputs": [
+        {
+          "field": "proposedSolution",
+          "label": "Proposed Solution",
+          "type": "textarea",
+          "placeholder": "A tool that... An app that... A service that...",
+          "helpText": "One paragraph describing what you would build",
+          "validation": {
+            "required": true,
+            "minLength": 20,
+            "maxLength": 1000
+          }
+        },
+        {
+          "field": "ideaName",
+          "label": "Working Name",
+          "type": "text",
+          "placeholder": "Give your idea a short name...",
+          "helpText": "This will be used for file naming (can change later)",
+          "validation": {
+            "required": true,
+            "minLength": 2,
+            "maxLength": 50,
+            "pattern": "^[a-zA-Z0-9 -]+$",
+            "message": "Use only letters, numbers, spaces, and hyphens"
+          }
+        }
+      ],
+      "outputField": "proposedSolution",
+      "dependsOn": ["0.2"]
+    },
+    {
+      "id": "0.4",
+      "name": "Initial Signals",
+      "type": "input",
+      "required": true,
+      "prompt": "Quick gut-check time! Have you searched for existing solutions? Would you pay for this? Do you know anyone with this exact pain?",
+      "instructions": [
+        "These are quick signal checks, not deep research",
+        "Honest answers help filter ideas early",
+        "Personal pain is a strong signal",
+        "Knowing real people with the problem is validation"
+      ],
+      "inputs": [
+        {
+          "field": "searchedForSolutions",
+          "label": "Have you searched for existing solutions?",
+          "type": "boolean",
+          "helpText": "Did you Google or check Product Hunt for alternatives?"
+        },
+        {
+          "field": "wouldYouPay",
+          "label": "Would you pay for this?",
+          "type": "select",
+          "options": [
+            { "value": "yes", "label": "Yes, definitely" },
+            { "value": "maybe", "label": "Maybe, depends on price" },
+            { "value": "no", "label": "No, but others might" }
+          ],
+          "validation": { "required": true }
+        },
+        {
+          "field": "pricePointGuess",
+          "label": "What price point feels right?",
+          "type": "select",
+          "options": [
+            { "value": "under_10", "label": "Under $10/month" },
+            { "value": "10_29", "label": "$10-29/month" },
+            { "value": "30_99", "label": "$30-99/month" },
+            { "value": "100_plus", "label": "$100+/month" },
+            { "value": "one_time_under_50", "label": "One-time under $50" },
+            { "value": "one_time_50_200", "label": "One-time $50-200" },
+            { "value": "one_time_200_plus", "label": "One-time $200+" }
+          ]
+        },
+        {
+          "field": "knowSomeoneWithPain",
+          "label": "Do you know someone with this exact pain?",
+          "type": "boolean",
+          "helpText": "A real person, not a hypothetical user"
+        },
+        {
+          "field": "whoHasPainDetails",
+          "label": "Who? (Optional)",
+          "type": "text",
+          "placeholder": "Name, role, or how you know them..."
+        }
+      ],
+      "outputField": "initialSignals",
+      "dependsOn": ["0.3"]
+    },
+    {
+      "id": "0.5",
+      "name": "Initial Triage",
+      "type": "decision",
+      "required": true,
+      "prompt": "Let me do a quick triage of this idea. I'll check three things: Is it a painful problem? Is it technically feasible with our stack? Could it generate revenue within 30 days of launch?",
+      "instructions": [
+        "This is a gut-check, not deep validation",
+        "All three should be 'Yes' for fast-track",
+        "If any is 'No', idea goes to backlog for later review",
+        "Don't kill ideas here - just prioritize"
+      ],
+      "inputs": [
+        {
+          "field": "isPainful",
+          "label": "Does this solve a painful problem?",
+          "type": "boolean",
+          "helpText": "Gut check - is this a 'hair on fire' problem?",
+          "validation": { "required": true }
+        },
+        {
+          "field": "isFeasible",
+          "label": "Is this technically feasible with our stack?",
+          "type": "boolean",
+          "helpText": "Can we build this with Next.js, Tauri, our locked stack?",
+          "validation": { "required": true }
+        },
+        {
+          "field": "canGenerateRevenue",
+          "label": "Could this generate revenue within 30 days of launch?",
+          "type": "boolean",
+          "helpText": "Is there a clear path to first paying customer?",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "triage",
+      "dependsOn": ["0.4"]
+    },
+    {
+      "id": "0.6",
+      "name": "Generate Idea File",
+      "type": "generation",
+      "required": true,
+      "prompt": "I'll now create your idea file in the vault. This captures everything we've discussed in a structured format.",
+      "instructions": [
+        "Generate slug from idea name (kebab-case)",
+        "Create file in _vault/backlog/ or _vault/active/ based on triage",
+        "Fill in all template sections",
+        "Add entry to _vault/IDEAS.md index"
+      ],
+      "outputField": "generatedFile",
+      "dependsOn": ["0.5"]
+    },
+    {
+      "id": "0.7",
+      "name": "Raw Notes",
+      "type": "input",
+      "required": false,
+      "prompt": "Anything else you want to capture? Links, screenshots, quotes, random thoughts? I'll add them to your idea file.",
+      "instructions": [
+        "This is optional but valuable",
+        "Capture any additional context",
+        "Links to discussions, articles, competitor sites",
+        "Raw quotes from people experiencing the problem"
+      ],
+      "inputs": [
+        {
+          "field": "additionalNotes",
+          "label": "Raw Notes",
+          "type": "textarea",
+          "placeholder": "Dump any additional context, links, screenshots, quotes here...",
+          "helpText": "Optional - any extra context you want to capture"
+        }
+      ],
+      "outputField": "rawNotes",
+      "dependsOn": ["0.6"]
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "idea",
+      "filePattern": "IDEA-{slug}.md",
+      "directory": "_vault/backlog",
+      "template": "# IDEA: {ideaName}\n\n**Captured:** {date}\n**Source:** {source}\n**Status:** Backlog\n\n## Problem Statement\n\n**Who has this problem:** {whoHasProblem}\n\n**Pain description:** {painDescription}\n\n**Current solutions:** {currentSolution}\n\n## Proposed Solution\n\n{proposedSolution}\n\n## Initial Signals\n\n- **Searched for solutions?** {searchedForSolutions}\n- **Would you pay for this?** {wouldYouPay} ({pricePointGuess})\n- **Know someone with this pain?** {knowSomeoneWithPain}\n\n## Triage\n\n- **Painful problem:** {isPainful}\n- **Technically feasible:** {isFeasible}\n- **Revenue in 30 days:** {canGenerateRevenue}\n\n## Raw Notes\n\n{additionalNotes}\n",
+      "requiredFields": [
+        "ideaName",
+        "source",
+        "whoHasProblem",
+        "painDescription",
+        "currentSolution",
+        "proposedSolution"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "ideaFile",
+      "type": "file",
+      "description": "Idea file created in vault",
+      "location": "_vault/backlog/IDEA-{slug}.md",
+      "validation": {
+        "required": true,
+        "message": "Idea file must be created"
+      }
+    },
+    {
+      "name": "indexEntry",
+      "type": "string",
+      "description": "Entry added to IDEAS.md index",
+      "validation": {
+        "required": true
+      }
+    },
+    {
+      "name": "triageResult",
+      "type": "string",
+      "description": "Triage decision: fast-track or backlog"
+    }
+  ],
+  "qualityGates": [
+    {
+      "id": "problem-clarity",
+      "description": "Can explain the problem in one sentence without jargon",
+      "condition": {
+        "field": "painDescription",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Problem statement must be clear and documented"
+    },
+    {
+      "id": "file-created",
+      "description": "Idea file exists in vault with template filled",
+      "condition": {
+        "field": "generatedFile",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Idea file must be created in _vault/"
+    },
+    {
+      "id": "indexed",
+      "description": "Idea appears in IDEAS.md index",
+      "condition": {
+        "field": "indexEntry",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Idea must be indexed in IDEAS.md"
+    },
+    {
+      "id": "source-documented",
+      "description": "Know where this idea came from",
+      "condition": {
+        "field": "source",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Idea source must be documented"
+    }
+  ],
+  "transition": {
+    "conditions": [
+      {
+        "field": "generatedFile",
+        "operator": "exists",
+        "value": true
+      }
+    ],
+    "nextSop": 1,
+    "message": "Idea captured! Ready to validate whether this problem is worth solving."
+  },
+  "pitfalls": [
+    {
+      "issue": "Solution-first thinking",
+      "fix": "Always write problem statement before solution"
+    },
+    {
+      "issue": "Idea hoarding",
+      "fix": "Vault is cheap storage—capture everything, filter later"
+    },
+    {
+      "issue": "Over-detailing early",
+      "fix": "Keep intake light; validation SOP does deep analysis"
+    },
+    {
+      "issue": "Forgetting the source",
+      "fix": "Capture source immediately, even if it's 'random thought'"
+    },
+    {
+      "issue": "Duplicate ideas",
+      "fix": "Search IDEAS.md before creating new file"
+    }
+  ]
+}
+

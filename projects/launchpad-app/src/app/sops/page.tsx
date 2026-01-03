@@ -164,14 +164,14 @@ export default function SOPsPage() {
                       {phaseSOPs.map((sop) => (
                         <div
                           key={sop.number}
-                          className="group flex items-center gap-4 rounded-xl bg-black/20 p-4 transition-colors hover:bg-black/30"
+                          className="group flex items-center gap-4 rounded-xl bg-white dark:bg-white/10 p-4 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)] transition-all border border-black/5"
                         >
                           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#3A3A3C] to-[#1C1C1E] text-sm font-bold text-white">
                             {sop.number.toString().padStart(2, "0")}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-foreground truncate">
+                              <h3 className="font-medium text-black dark:text-white truncate">
                                 {sop.name}
                               </h3>
                               {sop.activeSOP?.tags && (
@@ -188,7 +188,7 @@ export default function SOPsPage() {
                                 </div>
                               )}
                             </div>
-                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-3 mt-1 text-xs text-black/60 dark:text-white/60">
                               {sop.activeSOP ? (
                                 <>
                                   <span className="flex items-center gap-1">
@@ -215,7 +215,7 @@ export default function SOPsPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 border-white/10 bg-white/5 hover:bg-white/10"
+                              className="h-8 border-blue-500/30 bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 hover:border-blue-500/50"
                             >
                               <FileText className="h-4 w-4 mr-1" />
                               View
@@ -223,7 +223,7 @@ export default function SOPsPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-8 border-white/10 bg-white/5 hover:bg-white/10"
+                              className="h-8 border-orange-500/30 bg-orange-500/10 text-orange-300 hover:bg-orange-500/20 hover:border-orange-500/50"
                             >
                               <Plus className="h-4 w-4 mr-1" />
                               New Version

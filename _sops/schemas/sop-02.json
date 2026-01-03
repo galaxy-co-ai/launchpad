@@ -1,0 +1,489 @@
+{
+  "$schema": "./schema-types.ts",
+  "sopNumber": 2,
+  "name": "MVP Scope Contract",
+  "description": "Lock features, timeline, and success metrics in writing",
+  "phase": "ideation",
+  "estimatedDuration": "30-60 minutes",
+  "prerequisites": {
+    "completedSops": [0, 1],
+    "requiredArtifacts": ["idea"],
+    "requiredFields": ["validationScore", "decision"],
+    "conditions": [
+      {
+        "field": "decision",
+        "operator": "eq",
+        "value": "green"
+      },
+      {
+        "field": "validationScore",
+        "operator": "gte",
+        "value": 90
+      }
+    ]
+  },
+  "steps": [
+    {
+      "id": "2.1",
+      "name": "Define Core Value Proposition",
+      "type": "input",
+      "required": true,
+      "prompt": "Let's lock in your MVP scope. First, complete this sentence: 'Users can [ACTION] so that [BENEFIT]'. This is your core value proposition.",
+      "instructions": [
+        "Focus on the ONE thing this MVP must do well",
+        "Should be completable in under 10 words",
+        "If you need 'and' in the sentence, you have two products",
+        "This is your 'bar napkin pitch'"
+      ],
+      "inputs": [
+        {
+          "field": "valueProposition",
+          "label": "Value Proposition",
+          "type": "text",
+          "placeholder": "Users can [ACTION] so that [BENEFIT]",
+          "helpText": "Complete the sentence - this is your core promise",
+          "validation": {
+            "required": true,
+            "minLength": 20,
+            "maxLength": 200
+          }
+        },
+        {
+          "field": "barNapkinPitch",
+          "label": "Bar Napkin Pitch",
+          "type": "text",
+          "placeholder": "Explain in 10 seconds what this does...",
+          "helpText": "If you can't explain it in 10 seconds, it's too complex",
+          "validation": {
+            "required": true,
+            "maxLength": 100
+          }
+        }
+      ],
+      "outputField": "valueProposition"
+    },
+    {
+      "id": "2.2",
+      "name": "List P0 Features",
+      "type": "input",
+      "required": true,
+      "prompt": "Now list ONLY the features required for your first paying customer. Maximum 5 features. Apply the 'would someone pay for JUST this?' test to each one.",
+      "instructions": [
+        "P0 = Cannot launch without it",
+        "Each feature must map to the value proposition",
+        "If it's 'nice to have', it's not P0",
+        "5 features maximum - this is a hard cap"
+      ],
+      "inputs": [
+        {
+          "field": "feature1",
+          "label": "P0 Feature 1",
+          "type": "text",
+          "placeholder": "Feature that is absolutely required...",
+          "helpText": "Must be specific and testable (yes/no done)",
+          "validation": { "required": true, "minLength": 10 }
+        },
+        {
+          "field": "feature2",
+          "label": "P0 Feature 2",
+          "type": "text",
+          "placeholder": "Feature that is absolutely required...",
+          "validation": { "required": true, "minLength": 10 }
+        },
+        {
+          "field": "feature3",
+          "label": "P0 Feature 3 (optional)",
+          "type": "text",
+          "placeholder": "Leave blank if not needed..."
+        },
+        {
+          "field": "feature4",
+          "label": "P0 Feature 4 (optional)",
+          "type": "text",
+          "placeholder": "Leave blank if not needed..."
+        },
+        {
+          "field": "feature5",
+          "label": "P0 Feature 5 (optional)",
+          "type": "text",
+          "placeholder": "Leave blank if not needed..."
+        }
+      ],
+      "validation": {
+        "minItems": 2,
+        "maxItems": 5,
+        "message": "Need at least 2 features, maximum 5"
+      },
+      "outputField": "p0Features",
+      "dependsOn": ["2.1"]
+    },
+    {
+      "id": "2.3",
+      "name": "Validate Feature Count",
+      "type": "validation",
+      "required": true,
+      "prompt": "Let me check your feature list. Each one should pass the 'would someone pay for JUST this?' test.",
+      "instructions": [
+        "Review each feature against value proposition",
+        "Remove anything that's P1 or P2 disguised as P0",
+        "Combine overlapping features if possible",
+        "Challenge: Can you launch with fewer?"
+      ],
+      "inputs": [
+        {
+          "field": "featureCount",
+          "label": "Total P0 Features",
+          "type": "number",
+          "validation": { "required": true, "min": 1, "max": 5 }
+        },
+        {
+          "field": "featureValidation",
+          "label": "Confirm each feature is truly P0",
+          "type": "boolean",
+          "helpText": "All features pass the 'would pay for just this' test",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "featureValidation",
+      "dependsOn": ["2.2"]
+    },
+    {
+      "id": "2.4",
+      "name": "Define Explicit Non-Goals",
+      "type": "input",
+      "required": true,
+      "prompt": "Now the important part: What will you NOT build in v1? List at least 5 things you'll say 'no' to. This prevents scope creep.",
+      "instructions": [
+        "Include obvious requests you'll decline",
+        "Think about what users will ask for first",
+        "Mobile app, team features, integrations often here",
+        "This is your defense against 'while we're at it'"
+      ],
+      "inputs": [
+        {
+          "field": "nonGoal1",
+          "label": "Non-Goal 1",
+          "type": "text",
+          "placeholder": "e.g., No mobile app (web-only)",
+          "validation": { "required": true }
+        },
+        {
+          "field": "nonGoal2",
+          "label": "Non-Goal 2",
+          "type": "text",
+          "placeholder": "e.g., No team features (single user)",
+          "validation": { "required": true }
+        },
+        {
+          "field": "nonGoal3",
+          "label": "Non-Goal 3",
+          "type": "text",
+          "placeholder": "e.g., No integrations (standalone)",
+          "validation": { "required": true }
+        },
+        {
+          "field": "nonGoal4",
+          "label": "Non-Goal 4",
+          "type": "text",
+          "placeholder": "e.g., No free tier (paid only)",
+          "validation": { "required": true }
+        },
+        {
+          "field": "nonGoal5",
+          "label": "Non-Goal 5",
+          "type": "text",
+          "placeholder": "e.g., No admin dashboard (manual ops)",
+          "validation": { "required": true }
+        },
+        {
+          "field": "additionalNonGoals",
+          "label": "Additional Non-Goals (optional)",
+          "type": "textarea",
+          "placeholder": "Any other things you're explicitly not building..."
+        }
+      ],
+      "validation": {
+        "minItems": 5
+      },
+      "outputField": "nonGoals",
+      "dependsOn": ["2.3"]
+    },
+    {
+      "id": "2.5",
+      "name": "Set Launch Day Success Metrics",
+      "type": "input",
+      "required": true,
+      "prompt": "What does success look like on launch day? Set specific, measurable targets.",
+      "instructions": [
+        "First paying customer is the most important",
+        "Be realistic but ambitious",
+        "Specific numbers, not vague goals",
+        "These metrics hold you accountable"
+      ],
+      "inputs": [
+        {
+          "field": "launchDayCustomers",
+          "label": "First Paying Customers Target",
+          "type": "number",
+          "defaultValue": 1,
+          "helpText": "How many paying customers on launch day?",
+          "validation": { "required": true, "min": 1 }
+        },
+        {
+          "field": "launchDayRevenue",
+          "label": "Launch Day Revenue Target ($)",
+          "type": "number",
+          "placeholder": "e.g., 29",
+          "helpText": "Total revenue from launch day sales",
+          "validation": { "required": true, "min": 1 }
+        }
+      ],
+      "outputField": "launchMetrics",
+      "dependsOn": ["2.4"]
+    },
+    {
+      "id": "2.6",
+      "name": "Set 30-Day Success Metrics",
+      "type": "input",
+      "required": true,
+      "prompt": "Now set your 30-day targets. This is your first month reality check.",
+      "instructions": [
+        "Revenue target should be achievable",
+        "Active users = people who actually use it",
+        "Churn under 20% is healthy for early stage",
+        "Calculate customers needed: target ÷ price"
+      ],
+      "inputs": [
+        {
+          "field": "thirtyDayRevenue",
+          "label": "30-Day Revenue Target ($)",
+          "type": "number",
+          "placeholder": "e.g., 500",
+          "validation": { "required": true, "min": 1 }
+        },
+        {
+          "field": "thirtyDayActiveUsers",
+          "label": "30-Day Active Users Target",
+          "type": "number",
+          "placeholder": "e.g., 10",
+          "validation": { "required": true, "min": 1 }
+        },
+        {
+          "field": "thirtyDayChurnTarget",
+          "label": "30-Day Max Churn Rate (%)",
+          "type": "number",
+          "defaultValue": 20,
+          "helpText": "Percentage of users who cancel in first month",
+          "validation": { "required": true, "min": 0, "max": 100 }
+        }
+      ],
+      "outputField": "thirtyDayMetrics",
+      "dependsOn": ["2.5"]
+    },
+    {
+      "id": "2.7",
+      "name": "Calculate Customer Math",
+      "type": "validation",
+      "required": true,
+      "prompt": "Let me calculate the customer math. Based on your pricing and targets, here's how many customers you need...",
+      "instructions": [
+        "Customers needed = Revenue target ÷ Price",
+        "This grounds expectations in reality",
+        "If numbers seem off, reconsider pricing or targets",
+        "Better to be realistic now than disappointed later"
+      ],
+      "inputs": [
+        {
+          "field": "pricePoint",
+          "label": "Price per customer ($/period)",
+          "type": "number",
+          "helpText": "From your validation research",
+          "validation": { "required": true }
+        },
+        {
+          "field": "customersNeeded30Day",
+          "label": "Customers needed for 30-day target",
+          "type": "number",
+          "helpText": "Calculated: 30-day revenue ÷ price",
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "customerMath",
+      "dependsOn": ["2.6"]
+    },
+    {
+      "id": "2.8",
+      "name": "Confirm Scope Change Policy",
+      "type": "decision",
+      "required": true,
+      "prompt": "This is a contract. Any feature addition requires: 1) Removing an existing P0 feature, OR 2) Explicit contract renegotiation with documented reasoning. No exceptions. Do you commit?",
+      "instructions": [
+        "This is a serious commitment",
+        "Scope creep kills projects",
+        "Adding features = removing features OR renegotiating",
+        "Both you and AI commit to enforcing this"
+      ],
+      "inputs": [
+        {
+          "field": "scopeCommitment",
+          "label": "I commit to this scope",
+          "type": "boolean",
+          "helpText": "No quick additions, no scope creep",
+          "validation": { "required": true }
+        },
+        {
+          "field": "aiEnforcement",
+          "label": "AI commits to flagging scope creep",
+          "type": "boolean",
+          "defaultValue": true,
+          "validation": { "required": true }
+        }
+      ],
+      "outputField": "scopeCommitment",
+      "dependsOn": ["2.7"]
+    },
+    {
+      "id": "2.9",
+      "name": "Generate MVP Contract",
+      "type": "generation",
+      "required": true,
+      "prompt": "I'll now generate your MVP Contract and save it to the vault. This is your binding scope document.",
+      "instructions": [
+        "Generate CONTRACT-{slug}.md in _vault/active/",
+        "Include all features, non-goals, and metrics",
+        "Set status to LOCKED",
+        "Add signature section with date"
+      ],
+      "outputField": "contractFile",
+      "dependsOn": ["2.8"]
+    }
+  ],
+  "artifacts": [
+    {
+      "type": "contract",
+      "filePattern": "CONTRACT-{slug}.md",
+      "directory": "_vault/active",
+      "template": "# MVP Contract: {productName}\n\n**Date:** {date}\n**Status:** LOCKED\n\n---\n\n## Value Proposition\n\n{valueProposition}\n\n**Bar Napkin Pitch:** {barNapkinPitch}\n\n---\n\n## MVP Features (P0 Only)\n\n1. [ ] {feature1}\n2. [ ] {feature2}\n3. [ ] {feature3}\n4. [ ] {feature4}\n5. [ ] {feature5}\n\n**Total Features:** {featureCount} (max 5)\n\n---\n\n## Explicit Non-Goals (v1)\n\n- [ ] {nonGoal1}\n- [ ] {nonGoal2}\n- [ ] {nonGoal3}\n- [ ] {nonGoal4}\n- [ ] {nonGoal5}\n{additionalNonGoals}\n\n---\n\n## Success Metrics\n\n| Metric | Target | Timeframe |\n|--------|--------|----------|\n| First paying customers | {launchDayCustomers} | Launch day |\n| Launch day revenue | ${launchDayRevenue} | Launch day |\n| Total revenue | ${thirtyDayRevenue} | First 30 days |\n| Active users | {thirtyDayActiveUsers} | First 30 days |\n| Max churn rate | {thirtyDayChurnTarget}% | First 30 days |\n\n**Customer Math:**\n- Price: ${pricePoint}/period\n- Customers needed for 30-day target: {customersNeeded30Day}\n\n---\n\n## Scope Change Policy\n\nAny feature addition requires:\n1. Removing an existing P0 feature, OR\n2. Explicit contract renegotiation with documented reasoning\n\n**No exceptions. No \"quick additions.\" No scope creep.**\n\n---\n\n## Signatures\n\n- [x] Dalton commits to this scope\n- [x] Claude commits to flagging scope creep\n\n**Contract Date:** {date}\n",
+      "requiredFields": [
+        "valueProposition",
+        "feature1",
+        "feature2",
+        "nonGoal1",
+        "nonGoal2",
+        "nonGoal3",
+        "nonGoal4",
+        "nonGoal5",
+        "launchDayCustomers",
+        "thirtyDayRevenue"
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "name": "contractFile",
+      "type": "file",
+      "description": "MVP Contract saved to vault",
+      "location": "_vault/active/CONTRACT-{slug}.md"
+    },
+    {
+      "name": "featureList",
+      "type": "array",
+      "description": "List of P0 features"
+    },
+    {
+      "name": "nonGoalsList",
+      "type": "array",
+      "description": "List of explicit non-goals"
+    },
+    {
+      "name": "successMetrics",
+      "type": "object",
+      "description": "All success metrics with targets"
+    }
+  ],
+  "qualityGates": [
+    {
+      "id": "features-capped",
+      "description": "No more than 5 P0 features",
+      "condition": {
+        "field": "featureCount",
+        "operator": "lte",
+        "value": 5
+      },
+      "required": true,
+      "errorMessage": "MVP cannot have more than 5 P0 features"
+    },
+    {
+      "id": "nongoals-listed",
+      "description": "At least 5 explicit things NOT being built",
+      "condition": {
+        "field": "nonGoal5",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Must list at least 5 non-goals"
+    },
+    {
+      "id": "metrics-defined",
+      "description": "Success criteria are specific numbers",
+      "condition": {
+        "field": "thirtyDayRevenue",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Success metrics must be specific numbers"
+    },
+    {
+      "id": "contract-saved",
+      "description": "Contract file exists in vault",
+      "condition": {
+        "field": "contractFile",
+        "operator": "exists",
+        "value": true
+      },
+      "required": true,
+      "errorMessage": "Contract must be saved to _vault/active/"
+    }
+  ],
+  "transition": {
+    "conditions": [
+      {
+        "field": "contractFile",
+        "operator": "exists",
+        "value": true
+      },
+      {
+        "field": "scopeCommitment",
+        "operator": "eq",
+        "value": true
+      }
+    ],
+    "nextSop": 3,
+    "message": "MVP scope locked! Contract saved. Now let's lock in your revenue model."
+  },
+  "pitfalls": [
+    {
+      "issue": "Too many features",
+      "fix": "Hard cap at 5, no exceptions"
+    },
+    {
+      "issue": "Vague features",
+      "fix": "Each feature must be testable (yes/no done)"
+    },
+    {
+      "issue": "No non-goals",
+      "fix": "Force yourself to list 5+ things you won't do"
+    },
+    {
+      "issue": "Soft metrics",
+      "fix": "Specific numbers: '10 users in 30 days'"
+    },
+    {
+      "issue": "Ignoring the contract",
+      "fix": "Treat scope creep as contract violation"
+    }
+  ]
+}
+

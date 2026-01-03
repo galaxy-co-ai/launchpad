@@ -5,6 +5,7 @@ import type {
   CreateProjectInput,
   RoadmapItem,
   Conversation,
+  ConversationWithContext,
   Message,
   AppSettings,
   ProjectAnalysis,
@@ -13,6 +14,9 @@ import type {
   Idea,
   CreateIdeaInput,
   IdeaStatus,
+  WorkflowProgress,
+  WorkflowContext,
+  CompleteStepInput,
 } from "./types";
 
 // Safe invoke wrapper - works in both Tauri and browser modes
@@ -56,6 +60,29 @@ interface SOPContext {
  * Detects which SOP the user is asking about based on message content
  * Returns the appropriate guided context for the AI
  */
+/**
+ * Detects if the user is asking to resume a previous session
+ */
+function detectResumeIntent(message: string): boolean {
+  const lowerMessage = message.toLowerCase();
+  const resumePatterns = [
+    'where were we',
+    'where did we leave off',
+    'continue from',
+    'pick up where',
+    'what were we doing',
+    'resume',
+    'continue our',
+    'last session',
+    'what was i working on',
+    "what's next",
+    'remind me',
+    'what step',
+    'where was i',
+  ];
+  return resumePatterns.some((pattern) => lowerMessage.includes(pattern));
+}
+
 function detectSOPContext(message: string): SOPContext | null {
   const lowerMessage = message.toLowerCase();
   
@@ -343,6 +370,12 @@ interface AppState {
   ideas: Idea[];
   ideasLoading: boolean;
 
+  // Workflow
+  currentWorkflow: WorkflowProgress | null;
+  currentWorkflowContext: WorkflowContext | null;
+  workflowLoading: boolean;
+  activeIdeaId: string | null;
+
   // Actions - Settings
   fetchSettings: () => Promise<void>;
   setSetting: (key: string, value: string) => Promise<void>;
@@ -364,11 +397,16 @@ interface AppState {
 
   // Actions - Chat
   fetchConversations: (projectId?: string) => Promise<void>;
+  fetchIdeaConversations: (ideaId: string) => Promise<Conversation[]>;
   createConversation: (projectId?: string, title?: string) => Promise<Conversation>;
+  createConversationForIdea: (ideaId: string, title?: string) => Promise<Conversation>;
   setCurrentConversation: (conversation: Conversation | null) => void;
   fetchMessages: (conversationId: string) => Promise<void>;
   sendMessage: (content: string) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
+  linkConversationToIdea: (conversationId: string, ideaId: string) => Promise<void>;
+  saveSessionSummary: (conversationId: string, summary: string) => Promise<void>;
+  getConversationWithContext: (conversationId: string) => Promise<ConversationWithContext | null>;
 
   // Actions - Analyzer
   analyzeProject: (path: string) => Promise<ProjectAnalysis>;
@@ -389,6 +427,16 @@ interface AppState {
   updateIdeaStatus: (id: string, status: IdeaStatus) => Promise<void>;
   saveIdeaAudit: (id: string, auditResult: string) => Promise<void>;
   deleteIdea: (id: string) => Promise<void>;
+
+  // Actions - Workflow
+  setActiveIdea: (ideaId: string | null) => void;
+  startWorkflow: (ideaId: string) => Promise<WorkflowProgress>;
+  getWorkflowState: (ideaId: string) => Promise<WorkflowProgress | null>;
+  completeStep: (input: CompleteStepInput) => Promise<WorkflowProgress>;
+  advanceSop: (ideaId: string) => Promise<WorkflowProgress>;
+  updateValidation: (ideaId: string, score: number, decision: string) => Promise<WorkflowProgress>;
+  fetchWorkflowContext: (ideaId: string) => Promise<WorkflowContext | null>;
+  generateAIContext: (ideaId: string) => Promise<string | null>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -423,6 +471,11 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   ideas: [],
   ideasLoading: false,
+
+  currentWorkflow: null,
+  currentWorkflowContext: null,
+  workflowLoading: false,
+  activeIdeaId: null,
 
   // ==========================================
   // Settings Actions
@@ -619,10 +672,47 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
+  fetchIdeaConversations: async (ideaId: string) => {
+    try {
+      const conversations = await invoke<Conversation[]>("list_idea_conversations", { ideaId });
+      return conversations;
+    } catch (err) {
+      console.error("Failed to fetch idea conversations:", err);
+      return [];
+    }
+  },
+
+  createConversationForIdea: async (ideaId: string, title?: string) => {
+    try {
+      const conversation = await invoke<Conversation>("create_conversation_with_idea", {
+        projectId: null,
+        ideaId,
+        title: title ?? null,
+      });
+      set((state) => ({
+        conversations: [conversation, ...state.conversations],
+        currentConversation: conversation,
+        messages: [],
+        activeIdeaId: ideaId,
+      }));
+      return conversation;
+    } catch (err) {
+      console.error("Failed to create conversation for idea:", err);
+      throw err;
+    }
+  },
+
   setCurrentConversation: (conversation: Conversation | null) => {
     set({ currentConversation: conversation, messages: [] });
     if (conversation) {
       get().fetchMessages(conversation.id);
+      // Auto-load workflow context if conversation is linked to an idea
+      if (conversation.idea_id) {
+        set({ activeIdeaId: conversation.idea_id });
+        get().fetchWorkflowContext(conversation.idea_id);
+      }
+    } else {
+      set({ activeIdeaId: null, currentWorkflow: null, currentWorkflowContext: null });
     }
   },
 
@@ -673,10 +763,25 @@ export const useAppStore = create<AppState>((set, get) => ({
 
       // Detect if user is asking about a specific SOP workflow
       const sopContext = detectSOPContext(content);
+      const isResumeIntent = detectResumeIntent(content);
 
       // Build context-aware system prompt
       let systemPrompt: string | null = null;
       const project = state.currentProject;
+      const activeIdeaId = state.activeIdeaId;
+      
+      // If this conversation is linked to an idea, use that as active idea
+      const effectiveIdeaId = activeIdeaId ?? conversation.idea_id;
+      
+      // Try to get workflow context for active idea
+      let workflowContextStr: string | null = null;
+      if (effectiveIdeaId) {
+        try {
+          workflowContextStr = await invoke<string | null>("generate_ai_context", { ideaId: effectiveIdeaId });
+        } catch (e) {
+          console.warn("Could not fetch workflow context:", e);
+        }
+      }
       
       // Base system prompt for guided workflows (no project context)
       const baseGuidedPrompt = `You are an AI assistant integrated into Launchpad, a Micro-SaaS shipping framework.
@@ -761,6 +866,32 @@ ${roadmapStatus}
         systemPrompt = `${baseGuidedPrompt}\n\n${sopContext.guidedPrompt}`;
       }
 
+      // Inject workflow context if available (takes precedence)
+      if (workflowContextStr) {
+        const workflowInjection = `\n\n${workflowContextStr}`;
+        if (systemPrompt) {
+          systemPrompt += workflowInjection;
+        } else {
+          systemPrompt = `${baseGuidedPrompt}${workflowInjection}`;
+        }
+      }
+
+      // Add resume-specific instructions if detected
+      if (isResumeIntent && workflowContextStr) {
+        const resumeInstructions = `
+
+## USER WANTS TO RESUME
+
+The user is asking where they left off. Based on the workflow context above:
+1. Summarize what has been completed so far
+2. State what step they're currently on
+3. Remind them of any data they've already provided
+4. Guide them to continue from exactly where they left off
+
+Be welcoming and oriented: "Welcome back! Last time we were working on [X]. You've completed [Y] and we're currently on [Z]. Let's continue..."`;
+        systemPrompt = (systemPrompt || baseGuidedPrompt) + resumeInstructions;
+      }
+
       // Send to Claude API (with project path for file tools)
       const response = await invoke<string>("send_chat_message", {
         apiKey,
@@ -799,6 +930,55 @@ ${roadmapStatus}
     } catch (err) {
       console.error("Failed to delete conversation:", err);
       throw err;
+    }
+  },
+
+  linkConversationToIdea: async (conversationId: string, ideaId: string) => {
+    try {
+      await invoke("link_conversation_to_idea", { conversationId, ideaId });
+      set((state) => ({
+        conversations: state.conversations.map((c) =>
+          c.id === conversationId ? { ...c, idea_id: ideaId } : c
+        ),
+        currentConversation:
+          state.currentConversation?.id === conversationId
+            ? { ...state.currentConversation, idea_id: ideaId }
+            : state.currentConversation,
+        activeIdeaId: ideaId,
+      }));
+    } catch (err) {
+      console.error("Failed to link conversation to idea:", err);
+      throw err;
+    }
+  },
+
+  saveSessionSummary: async (conversationId: string, summary: string) => {
+    try {
+      await invoke("save_session_summary", { conversationId, summary });
+      set((state) => ({
+        conversations: state.conversations.map((c) =>
+          c.id === conversationId ? { ...c, session_summary: summary } : c
+        ),
+        currentConversation:
+          state.currentConversation?.id === conversationId
+            ? { ...state.currentConversation, session_summary: summary }
+            : state.currentConversation,
+      }));
+    } catch (err) {
+      console.error("Failed to save session summary:", err);
+      throw err;
+    }
+  },
+
+  getConversationWithContext: async (conversationId: string) => {
+    try {
+      const result = await invoke<ConversationWithContext>("get_conversation_with_context", {
+        conversationId,
+      });
+      return result;
+    } catch (err) {
+      console.error("Failed to get conversation with context:", err);
+      return null;
     }
   },
 
@@ -990,6 +1170,114 @@ ${roadmapStatus}
     } catch (err) {
       console.error("Failed to delete idea:", err);
       throw err;
+    }
+  },
+
+  // ==========================================
+  // Workflow Actions
+  // ==========================================
+
+  setActiveIdea: (ideaId: string | null) => {
+    set({ activeIdeaId: ideaId });
+    if (ideaId) {
+      // Automatically fetch workflow context when idea is set
+      get().fetchWorkflowContext(ideaId);
+    } else {
+      set({ currentWorkflow: null, currentWorkflowContext: null });
+    }
+  },
+
+  startWorkflow: async (ideaId: string) => {
+    set({ workflowLoading: true });
+    try {
+      const workflow = await invoke<WorkflowProgress>("start_workflow", { ideaId });
+      set({ currentWorkflow: workflow, workflowLoading: false, activeIdeaId: ideaId });
+      // Also fetch the full context
+      get().fetchWorkflowContext(ideaId);
+      return workflow;
+    } catch (err) {
+      console.error("Failed to start workflow:", err);
+      set({ workflowLoading: false });
+      throw err;
+    }
+  },
+
+  getWorkflowState: async (ideaId: string) => {
+    try {
+      const workflow = await invoke<WorkflowProgress | null>("get_workflow_state", { ideaId });
+      if (workflow) {
+        set({ currentWorkflow: workflow });
+      }
+      return workflow;
+    } catch (err) {
+      console.error("Failed to get workflow state:", err);
+      return null;
+    }
+  },
+
+  completeStep: async (input: CompleteStepInput) => {
+    try {
+      const workflow = await invoke<WorkflowProgress>("complete_step", { input });
+      set({ currentWorkflow: workflow });
+      // Refresh context after completing step
+      get().fetchWorkflowContext(input.idea_id);
+      return workflow;
+    } catch (err) {
+      console.error("Failed to complete step:", err);
+      throw err;
+    }
+  },
+
+  advanceSop: async (ideaId: string) => {
+    try {
+      const workflow = await invoke<WorkflowProgress>("advance_sop", { ideaId });
+      set({ currentWorkflow: workflow });
+      // Refresh context after advancing
+      get().fetchWorkflowContext(ideaId);
+      return workflow;
+    } catch (err) {
+      console.error("Failed to advance SOP:", err);
+      throw err;
+    }
+  },
+
+  updateValidation: async (ideaId: string, score: number, decision: string) => {
+    try {
+      const workflow = await invoke<WorkflowProgress>("update_validation", { ideaId, score, decision });
+      set({ currentWorkflow: workflow });
+      // Refresh context after validation update
+      get().fetchWorkflowContext(ideaId);
+      return workflow;
+    } catch (err) {
+      console.error("Failed to update validation:", err);
+      throw err;
+    }
+  },
+
+  fetchWorkflowContext: async (ideaId: string) => {
+    set({ workflowLoading: true });
+    try {
+      const context = await invoke<WorkflowContext | null>("get_workflow_context", { ideaId });
+      set({ 
+        currentWorkflowContext: context, 
+        currentWorkflow: context?.workflow ?? null,
+        workflowLoading: false 
+      });
+      return context;
+    } catch (err) {
+      console.error("Failed to fetch workflow context:", err);
+      set({ workflowLoading: false });
+      return null;
+    }
+  },
+
+  generateAIContext: async (ideaId: string) => {
+    try {
+      const context = await invoke<string | null>("generate_ai_context", { ideaId });
+      return context;
+    } catch (err) {
+      console.error("Failed to generate AI context:", err);
+      return null;
     }
   },
 }));

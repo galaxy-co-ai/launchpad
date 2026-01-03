@@ -60,12 +60,27 @@ impl Database {
             "CREATE TABLE IF NOT EXISTS conversations (
                 id TEXT PRIMARY KEY,
                 project_id TEXT,
+                idea_id TEXT,
                 title TEXT,
+                session_summary TEXT,
                 created_at TEXT NOT NULL DEFAULT (datetime('now')),
-                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+                FOREIGN KEY (idea_id) REFERENCES ideas(id) ON DELETE SET NULL
             )",
             [],
         )?;
+
+        // Add idea_id column if it doesn't exist (migration for existing DBs)
+        conn.execute(
+            "ALTER TABLE conversations ADD COLUMN idea_id TEXT REFERENCES ideas(id) ON DELETE SET NULL",
+            [],
+        ).ok(); // Ignore error if column already exists
+
+        // Add session_summary column if it doesn't exist
+        conn.execute(
+            "ALTER TABLE conversations ADD COLUMN session_summary TEXT",
+            [],
+        ).ok();
 
         // Messages table
         conn.execute(
@@ -151,6 +166,37 @@ impl Database {
             [],
         )?;
 
+        // Workflow progress table - tracks idea progress through SOPs
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS workflow_progress (
+                id TEXT PRIMARY KEY,
+                idea_id TEXT NOT NULL,
+                current_sop INTEGER DEFAULT 0,
+                current_step TEXT,
+                completed_steps TEXT DEFAULT '[]',
+                step_data TEXT DEFAULT '{}',
+                validation_score INTEGER,
+                decision TEXT,
+                started_at TEXT NOT NULL DEFAULT (datetime('now')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (idea_id) REFERENCES ideas(id) ON DELETE CASCADE
+            )",
+            [],
+        )?;
+
+        // Workflow artifacts table - links generated files to workflows
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS workflow_artifacts (
+                id TEXT PRIMARY KEY,
+                workflow_id TEXT NOT NULL,
+                artifact_type TEXT NOT NULL,
+                file_path TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now')),
+                FOREIGN KEY (workflow_id) REFERENCES workflow_progress(id) ON DELETE CASCADE
+            )",
+            [],
+        )?;
+
         // Create indexes for performance
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_messages_conversation
@@ -179,6 +225,18 @@ impl Database {
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_ideas_status
              ON ideas(status)",
+            [],
+        )?;
+
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_workflow_idea
+             ON workflow_progress(idea_id)",
+            [],
+        )?;
+
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_workflow_artifacts
+             ON workflow_artifacts(workflow_id)",
             [],
         )?;
 
