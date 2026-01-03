@@ -1,5 +1,5 @@
 {
-  "name": "launchpad-app",
+  "name": "launchpad-project",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,6 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
@@ -44,6 +48,12 @@
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.0.0",
     "prettier": "^3.4.0",
-    "prettier-plugin-tailwindcss": "^0.6.0"
+    "prettier-plugin-tailwindcss": "^0.6.0",
+    "vitest": "^2.1.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/jest-dom": "^6.6.0",
+    "jsdom": "^25.0.0",
+    "@vitest/coverage-v8": "^2.1.0"
   }
 }
