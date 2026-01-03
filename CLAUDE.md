@@ -91,7 +91,7 @@ launchpad/
 | `MANIFEST.md` | System status tracker |
 | `_stack/STACK.md` | Locked tech decisions |
 | `_design-system/DESIGN_SYSTEM.md` | Design token reference |
-| `_vault/IDEAS.md` | 140 pre-validated ideas |
+| `_vault/IDEAS.md` | Idea vault index |
 | `AGENTS.md` | AI agent routing |
 
 ## Commands

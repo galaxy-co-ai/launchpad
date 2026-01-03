@@ -33,7 +33,7 @@ npm run dev
 launchpad/
 ├── _design-system/   → LOCKED design tokens, components, themes
 ├── _stack/           → LOCKED tech decisions, patterns, anti-patterns
-├── _sops/            → Standard Operating Procedures (0-7)
+├── _sops/            → Standard Operating Procedures (00-12)
 ├── _templates/       → Project boilerplates, docs, env files
 ├── _vault/           → Ideas vault (active/backlog/shipped/killed)
 ├── _agents/          → n8n workflows, prompts, MCP configs
@@ -46,14 +46,19 @@ launchpad/
 
 | Phase | SOP | Purpose |
 |-------|-----|---------|
-| 0 | `00-idea-intake.md` | Capture and route ideas to vault |
-| 1 | `01-validation.md` | Score painkiller potential |
-| 2 | `02-mvp-scope-contract.md` | Lock scope, prevent creep |
-| 3 | `03-project-setup.md` | Scaffold from templates |
-| 4 | `04-build-sprint.md` | Structured dev with checkpoints |
-| 5 | `05-ship-checklist.md` | Pre-launch verification |
-| 6 | `06-launch.md` | Go-live sequence |
-| 7 | `07-post-launch.md` | Monitor, iterate, grow |
+| Ideation | `00-idea-intake.md` | Capture and route ideas to vault |
+| Ideation | `01-quick-validation.md` | Score painkiller potential |
+| Ideation | `02-mvp-scope-contract.md` | Lock scope, prevent creep |
+| Ideation | `03-revenue-model-lock.md` | Define monetization model |
+| Design | `04-design-brief.md` | Plan UI and user flows |
+| Setup | `05-project-setup.md` | Scaffold from templates |
+| Setup | `06-infrastructure-provisioning.md` | Connect services |
+| Build | `07-development-protocol.md` | Build features with quality |
+| Build | `08-testing-qa-checklist.md` | Ensure functionality |
+| Launch | `09-pre-ship-checklist.md` | Pre-launch verification |
+| Launch | `10-launch-day-protocol.md` | Go-live sequence |
+| Post-Launch | `11-post-launch-monitoring.md` | Monitor and iterate |
+| Post-Launch | `12-marketing-activation.md` | Acquire customers |
 
 ## Tech Stack (LOCKED)
 
@@ -81,7 +86,7 @@ launchpad/
 | `CURSORRULES.md` | Cursor IDE rules |
 | `AGENTS.md` | Agent routing constitution |
 | `MANIFEST.md` | System status tracker |
-| `_vault/IDEAS.md` | 140 pre-validated ideas |
+| `_vault/IDEAS.md` | Idea vault index |
 
 ## Philosophy
 

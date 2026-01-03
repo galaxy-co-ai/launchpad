@@ -3,8 +3,8 @@
 > Operating system for AI agents working on GalaxyCo.ai Micro-SaaS projects.
 
 **Owner:** Dalton  
-**Version:** 1.0  
-**Updated:** 2025-12-27
+**Version:** 1.1  
+**Updated:** 2026-01-03
 
 ---
 
@@ -51,41 +51,64 @@ launchpad/
 → Load `_sops/00-idea-intake.md` → Route to `_vault/`
 
 **"I'm validating an idea"**  
-→ Load `_sops/01-validation.md` → Score painkiller potential
+→ Load `_sops/01-quick-validation.md` → Score painkiller potential
+
+**"I'm scoping an MVP"**  
+→ Load `_sops/02-mvp-scope-contract.md` + `_sops/03-revenue-model-lock.md`  
+→ Lock features and monetization
+
+**"I'm designing the product"**  
+→ Load `_sops/04-design-brief.md` + `_design-system/DESIGN_SYSTEM.md`  
+→ Plan UI before code
 
 **"I'm starting a new project"**  
-→ Load `_sops/02-mvp-scope-contract.md` + `_sops/03-project-setup.md`  
+→ Load `_sops/05-project-setup.md` + `_sops/06-infrastructure-provisioning.md`  
 → Run `_scripts/new-project.ps1`
 
 **"I'm building a feature"**  
-→ Load `_sops/04-build-sprint.md` + `_stack/STACK.md`  
+→ Load `_sops/07-development-protocol.md` + `_stack/STACK.md`  
 → Reference `_design-system/` for UI
 
+**"I'm testing/QA"**  
+→ Load `_sops/08-testing-qa-checklist.md` → Ensure quality
+
 **"I'm ready to ship"**  
-→ Load `_sops/05-ship-checklist.md` → No gaps allowed
+→ Load `_sops/09-pre-ship-checklist.md` → No gaps allowed
 
 **"I'm launching"**  
-→ Load `_sops/06-launch.md` → Go-live sequence
+→ Load `_sops/10-launch-day-protocol.md` → Go-live sequence
 
 **"I'm monitoring/iterating"**  
-→ Load `_sops/07-post-launch.md` → Feedback loops
+→ Load `_sops/11-post-launch-monitoring.md` → Watch + iterate
+
+**"I'm marketing"**  
+→ Load `_sops/12-marketing-activation.md` → Acquire customers
 
 ---
 
 ## Tool Integrations
 
+All integration setup guides are consolidated in `_integrations/INTEGRATIONS.md`.
+
+| Tool | Purpose | Setup Guide Section |
+|------|---------|---------------------|
+| Neon | PostgreSQL database | Section 1 |
+| Clerk | Authentication | Section 2 |
+| Upstash Redis | Cache + rate limiting | Section 3 |
+| Stripe | Payments | Section 4 |
+| Anthropic | Claude AI | Section 5 |
+| Upstash Vector | Vector DB for AI | Section 6 |
+| Sentry | Error tracking | Section 7 |
+| Vercel | Hosting + deploy | Section 8 |
+| Resend | Email | Section 9 |
+| UploadThing | File uploads | Section 10 |
+
+**Agent Tooling:**
 | Tool | Purpose | Config Location |
 |------|---------|-----------------|
-| GitHub | Version control | `_integrations/github/` |
-| Vercel | Hosting + deploy | `_integrations/vercel/` |
-| Clerk | Authentication | `_integrations/clerk/` |
-| Stripe | Payments | `_integrations/stripe/` |
-| Sentry | Error tracking | `_integrations/sentry/` |
-| Porkbun | Domain purchase | `_integrations/porkbun/` |
-| Neon | PostgreSQL | `_integrations/neon/` |
-| Upstash | Redis + Vector | `_integrations/upstash/` |
-| Canva MCP | Brand generation | `_agents/mcp/` |
 | n8n | Workflow automation | `_agents/n8n/workflows/` |
+| MCP Servers | AI tool access | `_agents/mcp/` |
+| Prompts | Reusable templates | `_agents/prompts/` |
 
 ---
 
