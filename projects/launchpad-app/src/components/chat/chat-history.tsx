@@ -3,9 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAppStore } from "@/lib/store";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { MessageSquare, Plus, Trash2, X, Search } from "lucide-react";
+import { MessageSquare, Plus, Trash2, X, Search, Terminal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Conversation } from "@/lib/types";
 
@@ -79,60 +77,75 @@ export function ChatHistory({ open, onClose, projectId }: ChatHistoryProps) {
     <div className="fixed inset-0 z-50 lg:relative lg:inset-auto">
       {/* Backdrop for mobile */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm lg:hidden"
+        className="absolute inset-0 bg-[var(--normandy-void)]/80 backdrop-blur-sm lg:hidden"
         onClick={onClose}
       />
 
       {/* Panel */}
-      <div className="absolute right-0 top-0 h-full w-80 border-l border-black/10 dark:border-white/10 bg-background/95 shadow-xl backdrop-blur-xl lg:relative lg:shadow-none">
+      <div className="normandy-panel absolute right-0 top-0 h-full w-80 border-l border-[var(--normandy-border)] bg-[var(--normandy-hull)] shadow-xl lg:relative lg:shadow-none">
         {/* Header */}
-        <div className="flex h-14 items-center justify-between border-b border-black/10 dark:border-white/10 px-4">
-          <h2 className="font-semibold text-foreground">Chat History</h2>
+        <div className="flex h-14 items-center justify-between border-b border-[var(--normandy-border)] px-4">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={handleNewChat} className="rounded-lg">
+            <Terminal className="h-4 w-4 text-[var(--normandy-cyan)]" />
+            <h2 className="normandy-label text-[var(--normandy-text-primary)]">COMM LOGS</h2>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleNewChat}
+              className="normandy-btn p-2"
+              title="New Session"
+            >
               <Plus className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={onClose} className="rounded-lg lg:hidden">
+            </button>
+            <button
+              onClick={onClose}
+              className="normandy-btn p-2 lg:hidden"
+              title="Close"
+            >
               <X className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
         </div>
 
         {/* Search */}
-        <div className="border-b border-black/10 dark:border-white/10 p-3">
+        <div className="border-b border-[var(--normandy-border)] p-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--normandy-text-muted)]" />
+            <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search chats..."
-              className="pl-9 bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 focus:border-blue-500/50"
+              placeholder="Search logs..."
+              className="normandy-input w-full pl-9"
             />
           </div>
         </div>
 
         {/* Conversations List */}
-        <ScrollArea className="h-[calc(100%-7.5rem)]">
+        <ScrollArea className="h-[calc(100%-7.5rem)] normandy-scroll">
           <div className="p-2">
             {chatLoading ? (
-              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                Loading...
+              <div className="px-4 py-8 text-center">
+                <div className="normandy-led normandy-led-warning mx-auto mb-3" />
+                <p className="text-sm text-[var(--normandy-text-muted)] normandy-mono">
+                  Scanning archives...
+                </p>
               </div>
             ) : filteredConversations.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <MessageSquare className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
-                <p className="text-sm text-muted-foreground">
-                  {searchQuery ? "No matching conversations" : "No conversations yet"}
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--normandy-cyan)]/20 bg-[var(--normandy-cyan-subtle)]">
+                  <MessageSquare className="h-6 w-6 text-[var(--normandy-cyan)]/50" />
+                </div>
+                <p className="text-sm text-[var(--normandy-text-muted)]">
+                  {searchQuery ? "No matching logs found" : "No comm logs recorded"}
                 </p>
                 {!searchQuery && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-4 border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5"
+                  <button
                     onClick={handleNewChat}
+                    className="normandy-btn normandy-btn-primary mt-4 px-4 py-2"
                   >
-                    Start a new chat
-                  </Button>
+                    <Plus className="mr-2 h-3 w-3" />
+                    Initialize Session
+                  </button>
                 )}
               </div>
             ) : (
@@ -142,29 +155,33 @@ export function ChatHistory({ open, onClose, projectId }: ChatHistoryProps) {
                     key={conversation.id}
                     onClick={() => handleSelectConversation(conversation)}
                     className={cn(
-                      "group flex w-full items-start gap-3 rounded-lg px-3 py-2 text-left transition-all",
+                      "group flex w-full items-start gap-3 rounded px-3 py-2 text-left transition-all border",
                       currentConversation?.id === conversation.id
-                        ? "bg-orange-500/10 text-orange-500 dark:text-orange-400 shadow-[0_0_12px_rgba(249,115,22,0.15)]"
-                        : "hover:bg-black/5 dark:hover:bg-white/5"
+                        ? "bg-[var(--normandy-orange-subtle)] text-[var(--normandy-orange)] border-[var(--normandy-orange)]/30 shadow-[0_0_12px_var(--normandy-orange-glow)]"
+                        : "border-transparent hover:bg-[var(--normandy-cyan-subtle)] hover:border-[var(--normandy-cyan)]/20"
                     )}
                   >
-                    <MessageSquare className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className={cn(
+                      "normandy-led mt-1.5",
+                      currentConversation?.id === conversation.id
+                        ? "normandy-led-online"
+                        : "normandy-led-offline"
+                    )} />
                     <div className="flex-1 overflow-hidden">
-                      <p className="truncate text-sm font-medium">
-                        {conversation.title || "New conversation"}
+                      <p className="truncate text-sm font-medium text-[var(--normandy-text-primary)]">
+                        {conversation.title || "New session"}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-[var(--normandy-text-muted)] normandy-mono">
                         {formatDate(conversation.created_at)}
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                    <button
+                      className="h-6 w-6 shrink-0 rounded p-1 opacity-0 transition-all group-hover:opacity-100 hover:bg-[rgba(255,68,68,0.1)] hover:text-[var(--normandy-danger)]"
                       onClick={(e) => handleDelete(e, conversation.id)}
+                      title="Delete log"
                     >
-                      <Trash2 className="h-3 w-3 text-muted-foreground hover:text-destructive" />
-                    </Button>
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </button>
                 ))}
               </div>

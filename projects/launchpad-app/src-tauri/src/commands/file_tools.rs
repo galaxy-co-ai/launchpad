@@ -1,8 +1,63 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 use glob::Pattern;
+
+/// Sensitive directories that should never be accessed
+const BLOCKED_PATHS: &[&str] = &[
+    "Windows\\System32",
+    "Windows\\SysWOW64",
+    "Program Files",
+    "ProgramData",
+    "\\AppData\\Local\\Microsoft",
+    "\\AppData\\Roaming\\Microsoft",
+    ".ssh",
+    ".gnupg",
+    ".aws",
+    ".azure",
+    "credentials",
+];
+
+/// Validates and canonicalizes a path, blocking sensitive directories
+fn validate_path(path_str: &str) -> Result<PathBuf, String> {
+    let path = Path::new(path_str);
+
+    // Canonicalize to resolve .. and symlinks
+    let canonical = path.canonicalize()
+        .map_err(|_| format!("Path does not exist or is not accessible: {}", path_str))?;
+
+    let canonical_str = canonical.to_string_lossy();
+
+    // Block access to sensitive system directories
+    for blocked in BLOCKED_PATHS {
+        if canonical_str.contains(blocked) {
+            log::warn!("Blocked access to sensitive path: {}", canonical_str);
+            return Err("Access to this directory is not allowed".to_string());
+        }
+    }
+
+    Ok(canonical)
+}
+
+/// Validates that a target path is within a base directory (prevents traversal)
+fn validate_path_within_base(base_path: &Path, target_path: &str) -> Result<PathBuf, String> {
+    let base_canonical = base_path.canonicalize()
+        .map_err(|_| format!("Base path does not exist: {}", base_path.display()))?;
+
+    let target = base_path.join(target_path);
+    let target_canonical = target.canonicalize()
+        .map_err(|_| format!("Target path does not exist: {}", target_path))?;
+
+    // Ensure target is within base directory
+    if !target_canonical.starts_with(&base_canonical) {
+        log::warn!("Path traversal attempt detected: {} (base: {})",
+            target_canonical.display(), base_canonical.display());
+        return Err("Path traversal not allowed".to_string());
+    }
+
+    Ok(target_canonical)
+}
 
 /// Result of a file search operation
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -36,18 +91,15 @@ pub fn list_files(
     pattern: Option<String>,
     max_depth: Option<usize>,
 ) -> Result<Vec<FileSearchResult>, String> {
-    let path = Path::new(&base_path);
-
-    if !path.exists() {
-        return Err(format!("Path does not exist: {}", base_path));
-    }
+    // Validate and canonicalize the path
+    let path = validate_path(&base_path)?;
 
     let depth = max_depth.unwrap_or(3);
     let mut results = Vec::new();
 
     let glob_pattern = pattern.as_ref().and_then(|p| Pattern::new(p).ok());
 
-    for entry in WalkDir::new(path)
+    for entry in WalkDir::new(&path)
         .max_depth(depth)
         .into_iter()
         .filter_entry(|e| {
@@ -64,7 +116,7 @@ pub fn list_files(
     {
         let entry_path = entry.path();
         let relative_path = entry_path
-            .strip_prefix(path)
+            .strip_prefix(&path)
             .unwrap_or(entry_path)
             .to_string_lossy()
             .to_string();
@@ -100,23 +152,20 @@ pub fn read_file(
     file_path: String,
     max_lines: Option<usize>,
 ) -> Result<FileContent, String> {
-    let path = Path::new(&file_path);
-
-    if !path.exists() {
-        return Err(format!("File does not exist: {}", file_path));
-    }
+    // Validate and canonicalize the path
+    let path = validate_path(&file_path)?;
 
     if !path.is_file() {
-        return Err(format!("Path is not a file: {}", file_path));
+        return Err("Path is not a file".to_string());
     }
 
     // Check file size first (limit to 1MB)
-    let metadata = fs::metadata(path).map_err(|e| e.to_string())?;
+    let metadata = fs::metadata(&path).map_err(|e| e.to_string())?;
     if metadata.len() > 1_000_000 {
         return Err("File too large (> 1MB). Use grep_files for large files.".to_string());
     }
 
-    let content = fs::read_to_string(path)
+    let content = fs::read_to_string(&path)
         .map_err(|e| format!("Failed to read file: {}", e))?;
 
     let lines: Vec<&str> = content.lines().collect();
@@ -145,11 +194,8 @@ pub fn grep_files(
     file_pattern: Option<String>,
     max_results: Option<usize>,
 ) -> Result<Vec<GrepResult>, String> {
-    let path = Path::new(&base_path);
-
-    if !path.exists() {
-        return Err(format!("Path does not exist: {}", base_path));
-    }
+    // Validate and canonicalize the path
+    let path = validate_path(&base_path)?;
 
     let max = max_results.unwrap_or(50);
     let mut results = Vec::new();
@@ -157,7 +203,7 @@ pub fn grep_files(
 
     let file_glob = file_pattern.as_ref().and_then(|p| Pattern::new(p).ok());
 
-    for entry in WalkDir::new(path)
+    for entry in WalkDir::new(&path)
         .max_depth(10)
         .into_iter()
         .filter_entry(|e| {
@@ -198,7 +244,7 @@ pub fn grep_files(
             for (line_num, line) in content.lines().enumerate() {
                 if line.to_lowercase().contains(&search_lower) {
                     let relative_path = entry_path
-                        .strip_prefix(path)
+                        .strip_prefix(&path)
                         .unwrap_or(entry_path)
                         .to_string_lossy()
                         .to_string();
@@ -226,11 +272,8 @@ pub fn get_directory_tree(
     base_path: String,
     max_depth: Option<usize>,
 ) -> Result<String, String> {
-    let path = Path::new(&base_path);
-
-    if !path.exists() {
-        return Err(format!("Path does not exist: {}", base_path));
-    }
+    // Validate and canonicalize the path
+    let path = validate_path(&base_path)?;
 
     let depth = max_depth.unwrap_or(3);
     let mut tree = String::new();

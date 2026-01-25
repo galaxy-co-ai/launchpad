@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useAppStore } from "@/lib/store";
-import { GlassCard } from "@/design-system/primitives/glass";
-import { Button } from "@/components/ui/button";
 import { SOP_PHASES, SOP_NAMES } from "@/lib/types";
 import type { SOP, SOPPhase } from "@/lib/types";
 import {
@@ -14,15 +12,15 @@ import {
   Clock,
   Archive,
   Plus,
-  Loader2,
   Lightbulb,
   Palette,
   Wrench,
   Code,
   Rocket,
   TrendingUp,
+  Shield,
 } from "lucide-react";
-import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 // Phase icons mapping
 const PHASE_ICONS: Record<SOPPhase, React.ElementType> = {
@@ -34,23 +32,38 @@ const PHASE_ICONS: Record<SOPPhase, React.ElementType> = {
   post_launch: TrendingUp,
 };
 
-// Phase colors for accents
-const PHASE_COLORS: Record<SOPPhase, string> = {
-  ideation: "text-amber-400",
-  design: "text-pink-400",
-  setup: "text-cyan-400",
-  build: "text-green-400",
-  launch: "text-orange-400",
-  post_launch: "text-blue-400",
-};
-
-const PHASE_BG: Record<SOPPhase, string> = {
-  ideation: "from-amber-500/20 to-amber-600/10",
-  design: "from-pink-500/20 to-pink-600/10",
-  setup: "from-cyan-500/20 to-cyan-600/10",
-  build: "from-green-500/20 to-green-600/10",
-  launch: "from-orange-500/20 to-orange-600/10",
-  post_launch: "from-blue-500/20 to-blue-600/10",
+// Phase colors using Normandy palette
+const PHASE_COLORS: Record<SOPPhase, { text: string; glow: string; border: string }> = {
+  ideation: {
+    text: "text-[var(--normandy-warning)]",
+    glow: "shadow-[0_0_12px_var(--normandy-warning-glow)]",
+    border: "border-[var(--normandy-warning)]/30",
+  },
+  design: {
+    text: "text-[var(--normandy-cyan)]",
+    glow: "shadow-[0_0_12px_var(--normandy-cyan-glow)]",
+    border: "border-[var(--normandy-cyan)]/30",
+  },
+  setup: {
+    text: "text-[var(--normandy-blue)]",
+    glow: "shadow-[0_0_12px_var(--normandy-blue-glow)]",
+    border: "border-[var(--normandy-blue)]/30",
+  },
+  build: {
+    text: "text-[var(--normandy-success)]",
+    glow: "shadow-[0_0_12px_var(--normandy-success-glow)]",
+    border: "border-[var(--normandy-success)]/30",
+  },
+  launch: {
+    text: "text-[var(--normandy-orange)]",
+    glow: "shadow-[0_0_12px_var(--normandy-orange-glow)]",
+    border: "border-[var(--normandy-orange)]/30",
+  },
+  post_launch: {
+    text: "text-[var(--normandy-cyan)]",
+    glow: "shadow-[0_0_12px_var(--normandy-cyan-glow)]",
+    border: "border-[var(--normandy-cyan)]/30",
+  },
 };
 
 export default function SOPsPage() {
@@ -99,28 +112,43 @@ export default function SOPsPage() {
 
   if (!initialized || sopsLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex h-full items-center justify-center bg-[var(--normandy-void)]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="normandy-led normandy-led-warning" style={{ width: 16, height: 16 }} />
+          <p className="normandy-mono text-sm text-[var(--normandy-text-muted)]">
+            Loading protocols...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto normandy-scroll bg-[var(--normandy-void)]">
       <div className="mx-auto max-w-4xl p-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">
-            Standard Operating Procedures
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            13 SOPs that transform an idea into a shipped, revenue-ready product
-          </p>
+        {/* Header */}
+        <div className="mb-8 normandy-panel p-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--normandy-orange)]/30 bg-[var(--normandy-orange-subtle)]">
+              <Shield className="h-6 w-6 text-[var(--normandy-orange)]" />
+            </div>
+            <div>
+              <h1 className="normandy-heading text-xl text-[var(--normandy-text-primary)]">
+                STANDARD OPERATING PROCEDURES
+              </h1>
+              <p className="text-[var(--normandy-text-secondary)] mt-1">
+                13 protocols to transform an idea into a shipped, revenue-ready product
+              </p>
+            </div>
+          </div>
         </div>
 
+        {/* Phase Cards */}
         <div className="space-y-4">
           {SOP_PHASES.map((phaseInfo) => {
             const PhaseIcon = PHASE_ICONS[phaseInfo.phase];
             const isExpanded = expandedPhases.has(phaseInfo.phase);
+            const colors = PHASE_COLORS[phaseInfo.phase];
             const phaseSOPs = phaseInfo.sops.map((num) => ({
               number: num,
               name: SOP_NAMES[num],
@@ -129,26 +157,31 @@ export default function SOPsPage() {
             }));
 
             return (
-              <GlassCard key={phaseInfo.phase} intensity="subtle" className="overflow-hidden">
+              <div key={phaseInfo.phase} className="normandy-panel overflow-hidden">
                 {/* Phase Header */}
                 <button
                   onClick={() => togglePhase(phaseInfo.phase)}
-                  className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-white/5"
+                  className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-[var(--normandy-cyan-subtle)]"
                 >
                   <div
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${PHASE_BG[phaseInfo.phase]}`}
+                    className={cn(
+                      "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border",
+                      colors.border,
+                      colors.glow
+                    )}
+                    style={{ background: "var(--normandy-panel)" }}
                   >
-                    <PhaseIcon className={`h-5 w-5 ${PHASE_COLORS[phaseInfo.phase]}`} />
+                    <PhaseIcon className={cn("h-5 w-5", colors.text)} />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-lg font-semibold text-foreground">
+                    <h2 className="normandy-heading text-[var(--normandy-text-primary)]">
                       {phaseInfo.label}
                     </h2>
-                    <p className="text-sm text-muted-foreground">
-                      {phaseInfo.sops.length} SOP{phaseInfo.sops.length !== 1 ? "s" : ""} in this phase
+                    <p className="text-sm text-[var(--normandy-text-muted)]">
+                      {phaseInfo.sops.length} protocol{phaseInfo.sops.length !== 1 ? "s" : ""} in this phase
                     </p>
                   </div>
-                  <div className="text-muted-foreground">
+                  <div className="text-[var(--normandy-text-muted)]">
                     {isExpanded ? (
                       <ChevronDown className="h-5 w-5" />
                     ) : (
@@ -159,19 +192,19 @@ export default function SOPsPage() {
 
                 {/* Phase Content */}
                 {isExpanded && (
-                  <div className="border-t border-white/10 p-4 pt-2">
+                  <div className="border-t border-[var(--normandy-border)] p-4">
                     <div className="space-y-3">
                       {phaseSOPs.map((sop) => (
                         <div
                           key={sop.number}
-                          className="group flex items-center gap-4 rounded-xl bg-black/20 p-4 transition-colors hover:bg-black/30"
+                          className="normandy-card group flex items-center gap-4 p-4 transition-all"
                         >
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#3A3A3C] to-[#1C1C1E] text-sm font-bold text-white">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--normandy-cyan)]/30 bg-[var(--normandy-hull)] normandy-mono text-sm font-bold text-[var(--normandy-cyan)]">
                             {sop.number.toString().padStart(2, "0")}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-foreground truncate">
+                              <h3 className="font-medium text-[var(--normandy-text-primary)] truncate">
                                 {sop.name}
                               </h3>
                               {sop.activeSOP?.tags && (
@@ -179,7 +212,7 @@ export default function SOPsPage() {
                                   {JSON.parse(sop.activeSOP.tags).map((tag: string) => (
                                     <span
                                       key={tag}
-                                      className="inline-flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-xs text-blue-300"
+                                      className="normandy-badge normandy-badge-cyan"
                                     >
                                       <Tag className="h-3 w-3" />
                                       {tag}
@@ -188,7 +221,7 @@ export default function SOPsPage() {
                                 </div>
                               )}
                             </div>
-                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-3 mt-1 text-xs text-[var(--normandy-text-muted)] normandy-mono">
                               {sop.activeSOP ? (
                                 <>
                                   <span className="flex items-center gap-1">
@@ -207,56 +240,48 @@ export default function SOPsPage() {
                                   </span>
                                 </>
                               ) : (
-                                <span className="text-amber-400">No content yet</span>
+                                <span className="text-[var(--normandy-warning)]">Awaiting input</span>
                               )}
                             </div>
                           </div>
                           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 border-white/10 bg-white/5 hover:bg-white/10"
-                            >
-                              <FileText className="h-4 w-4 mr-1" />
+                            <button className="normandy-btn px-3 py-1.5 text-xs">
+                              <FileText className="h-3.5 w-3.5 mr-1.5" />
                               View
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 border-white/10 bg-white/5 hover:bg-white/10"
-                            >
-                              <Plus className="h-4 w-4 mr-1" />
+                            </button>
+                            <button className="normandy-btn normandy-btn-primary px-3 py-1.5 text-xs">
+                              <Plus className="h-3.5 w-3.5 mr-1.5" />
                               New Version
-                            </Button>
+                            </button>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
-              </GlassCard>
+              </div>
             );
           })}
         </div>
 
         {/* Quick Stats */}
         <div className="mt-8 grid grid-cols-3 gap-4">
-          <GlassCard intensity="subtle" className="p-4 text-center">
-            <div className="text-3xl font-bold text-foreground">
+          <div className="normandy-card p-4 text-center">
+            <div className="normandy-value text-3xl font-bold">
               {sops.filter((s) => s.is_active).length}
             </div>
-            <div className="text-sm text-muted-foreground">Active SOPs</div>
-          </GlassCard>
-          <GlassCard intensity="subtle" className="p-4 text-center">
-            <div className="text-3xl font-bold text-foreground">{sops.length}</div>
-            <div className="text-sm text-muted-foreground">Total Versions</div>
-          </GlassCard>
-          <GlassCard intensity="subtle" className="p-4 text-center">
-            <div className="text-3xl font-bold text-foreground">
+            <div className="normandy-label mt-1">Active Protocols</div>
+          </div>
+          <div className="normandy-card p-4 text-center">
+            <div className="normandy-value text-3xl font-bold">{sops.length}</div>
+            <div className="normandy-label mt-1">Total Versions</div>
+          </div>
+          <div className="normandy-card p-4 text-center">
+            <div className="normandy-value text-3xl font-bold">
               {SOP_PHASES.length}
             </div>
-            <div className="text-sm text-muted-foreground">Phases</div>
-          </GlassCard>
+            <div className="normandy-label mt-1">Mission Phases</div>
+          </div>
         </div>
       </div>
     </div>

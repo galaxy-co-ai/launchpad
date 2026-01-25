@@ -192,6 +192,22 @@ export interface AppSettings {
 }
 
 // ============================================
+// Error Types
+// ============================================
+
+export type ErrorSeverity = "info" | "warning" | "error" | "critical";
+
+export interface AppError {
+  id: string;
+  message: string;
+  severity: ErrorSeverity;
+  code?: string;
+  context?: string; // e.g., "projects", "chat", "settings"
+  timestamp: string;
+  dismissed?: boolean;
+}
+
+// ============================================
 // Project Analysis Types
 // ============================================
 

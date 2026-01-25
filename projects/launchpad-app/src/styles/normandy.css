@@ -1,0 +1,755 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   LAUNCHPAD - NORMANDY THEME SYSTEM
+   Mass Effect-Inspired Command Center UI with Dark & Light Modes
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════════════════
+   DARK MODE - DEEP SPACE COMMAND CENTER
+   Primary: Commander Orange | Secondary: Holographic Cyan
+   ════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Primary - Commander Orange */
+  --normandy-orange: #ff7b00;
+  --normandy-orange-dim: #cc5500;
+  --normandy-orange-bright: #ff9933;
+  --normandy-orange-glow: rgba(255, 123, 0, 0.5);
+  --normandy-orange-subtle: rgba(255, 123, 0, 0.12);
+
+  /* Secondary - Holographic Cyan */
+  --normandy-cyan: #00d4ff;
+  --normandy-cyan-dim: #0099cc;
+  --normandy-cyan-bright: #33ddff;
+  --normandy-cyan-glow: rgba(0, 212, 255, 0.5);
+  --normandy-cyan-subtle: rgba(0, 212, 255, 0.1);
+
+  /* Tertiary - Intel Blue */
+  --normandy-blue: #3b82f6;
+  --normandy-blue-glow: rgba(59, 130, 246, 0.4);
+
+  /* Status Colors */
+  --normandy-success: #00ff88;
+  --normandy-success-glow: rgba(0, 255, 136, 0.4);
+  --normandy-warning: #ffaa00;
+  --normandy-warning-glow: rgba(255, 170, 0, 0.4);
+  --normandy-danger: #ff4444;
+  --normandy-danger-glow: rgba(255, 68, 68, 0.4);
+
+  /* Dark Mode Backgrounds - Deep Space */
+  --normandy-void: #080810;
+  --normandy-hull: #0f1117;
+  --normandy-panel: #161921;
+  --normandy-surface: #1e222b;
+  --normandy-elevated: #262b36;
+
+  /* Dark Mode Text */
+  --normandy-text-primary: #f0f2f5;
+  --normandy-text-secondary: #a8adb5;
+  --normandy-text-muted: #6b7280;
+
+  /* Dark Mode Borders */
+  --normandy-border: rgba(255, 255, 255, 0.06);
+  --normandy-border-subtle: rgba(255, 255, 255, 0.03);
+  --normandy-border-active: rgba(255, 123, 0, 0.5);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   LIGHT MODE - CLEAN OPERATIONAL INTERFACE
+   Professional, high-contrast, easy on the eyes
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.light {
+  /* Primary - Deeper Orange for contrast */
+  --normandy-orange: #e65c00;
+  --normandy-orange-dim: #cc5200;
+  --normandy-orange-bright: #ff6b1a;
+  --normandy-orange-glow: rgba(230, 92, 0, 0.25);
+  --normandy-orange-subtle: rgba(230, 92, 0, 0.08);
+
+  /* Secondary - Deeper Cyan for visibility */
+  --normandy-cyan: #0891b2;
+  --normandy-cyan-dim: #0e7490;
+  --normandy-cyan-bright: #06b6d4;
+  --normandy-cyan-glow: rgba(8, 145, 178, 0.25);
+  --normandy-cyan-subtle: rgba(8, 145, 178, 0.06);
+
+  /* Tertiary - Intel Blue */
+  --normandy-blue: #2563eb;
+  --normandy-blue-glow: rgba(37, 99, 235, 0.2);
+
+  /* Status Colors - Darker for contrast */
+  --normandy-success: #059669;
+  --normandy-success-glow: rgba(5, 150, 105, 0.2);
+  --normandy-warning: #d97706;
+  --normandy-warning-glow: rgba(217, 119, 6, 0.2);
+  --normandy-danger: #dc2626;
+  --normandy-danger-glow: rgba(220, 38, 38, 0.2);
+
+  /* Light Mode Backgrounds - Clean & Bright */
+  --normandy-void: #f8fafc;
+  --normandy-hull: #ffffff;
+  --normandy-panel: #f1f5f9;
+  --normandy-surface: #e2e8f0;
+  --normandy-elevated: #ffffff;
+
+  /* Light Mode Text */
+  --normandy-text-primary: #0f172a;
+  --normandy-text-secondary: #475569;
+  --normandy-text-muted: #94a3b8;
+
+  /* Light Mode Borders */
+  --normandy-border: rgba(0, 0, 0, 0.08);
+  --normandy-border-subtle: rgba(0, 0, 0, 0.04);
+  --normandy-border-active: rgba(230, 92, 0, 0.4);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   HOLOGRAPHIC SCANLINES
+   Subtle overlay effect for that command center feel (dark mode only)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dark .normandy-scanlines {
+  position: relative;
+}
+
+.dark .normandy-scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 212, 255, 0.012) 2px,
+    rgba(0, 212, 255, 0.012) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   HOLOGRAPHIC PANEL
+   The signature glass panel with corner accents
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-panel {
+  background: var(--normandy-panel);
+  border: 1px solid var(--normandy-border);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Corner accents - dark mode */
+.dark .normandy-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border-top: 2px solid var(--normandy-cyan);
+  border-left: 2px solid var(--normandy-cyan);
+  opacity: 0.5;
+  border-radius: 8px 0 0 0;
+}
+
+.dark .normandy-panel::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  border-bottom: 2px solid var(--normandy-cyan);
+  border-right: 2px solid var(--normandy-cyan);
+  opacity: 0.5;
+  border-radius: 0 0 8px 0;
+}
+
+/* Light mode panels - cleaner look */
+.light .normandy-panel {
+  background: var(--normandy-hull);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.light .normandy-panel::before,
+.light .normandy-panel::after {
+  opacity: 0.3;
+}
+
+/* Active/focused panel */
+.normandy-panel-active {
+  border-color: var(--normandy-orange-dim);
+  box-shadow:
+    0 0 20px var(--normandy-orange-glow),
+    inset 0 0 30px rgba(255, 123, 0, 0.03);
+}
+
+.normandy-panel-active::before,
+.normandy-panel-active::after {
+  border-color: var(--normandy-orange);
+  opacity: 0.7;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   HOLOGRAPHIC CARD
+   Floating data display with glow effects
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-card {
+  background: var(--normandy-elevated);
+  border: 1px solid var(--normandy-border);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.dark .normandy-card {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 212, 255, 0.06) 0%,
+    rgba(0, 212, 255, 0.02) 100%
+  );
+  border-color: rgba(0, 212, 255, 0.15);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.25),
+    0 0 1px rgba(0, 212, 255, 0.2);
+}
+
+.dark .normandy-card:hover {
+  border-color: rgba(0, 212, 255, 0.35);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 16px var(--normandy-cyan-glow);
+  transform: translateY(-2px);
+}
+
+.light .normandy-card {
+  background: var(--normandy-hull);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.light .normandy-card:hover {
+  border-color: var(--normandy-cyan);
+  box-shadow:
+    0 4px 16px rgba(8, 145, 178, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+/* Orange variant for action cards */
+.normandy-card-action {
+  border-color: rgba(255, 123, 0, 0.2);
+}
+
+.dark .normandy-card-action {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 123, 0, 0.06) 0%,
+    rgba(255, 123, 0, 0.02) 100%
+  );
+}
+
+.dark .normandy-card-action:hover {
+  border-color: rgba(255, 123, 0, 0.45);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 16px var(--normandy-orange-glow);
+}
+
+.light .normandy-card-action:hover {
+  border-color: var(--normandy-orange);
+  box-shadow:
+    0 4px 16px rgba(230, 92, 0, 0.12);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   STATUS INDICATORS
+   LED-style status lights with glow effects
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.normandy-led-online {
+  background: var(--normandy-success);
+  box-shadow:
+    0 0 6px var(--normandy-success-glow),
+    0 0 12px var(--normandy-success-glow);
+  animation: normandy-pulse 2s ease-in-out infinite;
+}
+
+.normandy-led-warning {
+  background: var(--normandy-warning);
+  box-shadow:
+    0 0 6px var(--normandy-warning-glow),
+    0 0 12px var(--normandy-warning-glow);
+  animation: normandy-pulse 1s ease-in-out infinite;
+}
+
+.normandy-led-offline {
+  background: var(--normandy-text-muted);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.normandy-led-danger {
+  background: var(--normandy-danger);
+  box-shadow:
+    0 0 6px var(--normandy-danger-glow),
+    0 0 12px var(--normandy-danger-glow);
+  animation: normandy-pulse 0.5s ease-in-out infinite;
+}
+
+/* Light mode LEDs - less intense glow */
+.light .normandy-led-online,
+.light .normandy-led-warning,
+.light .normandy-led-danger {
+  box-shadow: 0 0 4px currentColor;
+}
+
+@keyframes normandy-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PROGRESS BARS
+   Mission-style progress tracking
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-progress {
+  height: 6px;
+  background: var(--normandy-surface);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--normandy-border);
+}
+
+.normandy-progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--normandy-cyan-dim) 0%,
+    var(--normandy-cyan) 50%,
+    var(--normandy-cyan-dim) 100%
+  );
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.dark .normandy-progress-fill {
+  box-shadow: 0 0 10px var(--normandy-cyan-glow);
+}
+
+/* Animated shine effect - dark mode only */
+.dark .normandy-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  animation: normandy-shine 2s ease-in-out infinite;
+}
+
+@keyframes normandy-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Orange progress for active missions */
+.normandy-progress-active .normandy-progress-fill {
+  background: linear-gradient(
+    90deg,
+    var(--normandy-orange-dim) 0%,
+    var(--normandy-orange) 50%,
+    var(--normandy-orange-dim) 100%
+  );
+}
+
+.dark .normandy-progress-active .normandy-progress-fill {
+  box-shadow: 0 0 10px var(--normandy-orange-glow);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BUTTONS
+   Command interface buttons with holographic effect
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--normandy-surface);
+  border: 1px solid var(--normandy-border);
+  color: var(--normandy-text-primary);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.dark .normandy-btn {
+  background: linear-gradient(
+    180deg,
+    rgba(38, 43, 54, 0.9) 0%,
+    rgba(30, 34, 43, 0.95) 100%
+  );
+}
+
+.normandy-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--normandy-cyan) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.normandy-btn:hover {
+  border-color: var(--normandy-cyan-dim);
+  background: var(--normandy-elevated);
+}
+
+.dark .normandy-btn:hover {
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 0 10px var(--normandy-cyan-glow);
+}
+
+.normandy-btn:hover::before {
+  opacity: 1;
+}
+
+/* Primary (Orange) button */
+.normandy-btn-primary {
+  border-color: var(--normandy-orange-dim);
+  color: var(--normandy-orange);
+}
+
+.dark .normandy-btn-primary {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 123, 0, 0.15) 0%,
+    rgba(255, 123, 0, 0.08) 100%
+  );
+}
+
+.light .normandy-btn-primary {
+  background: var(--normandy-orange-subtle);
+}
+
+.normandy-btn-primary::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--normandy-orange) 50%,
+    transparent 100%
+  );
+}
+
+.normandy-btn-primary:hover {
+  border-color: var(--normandy-orange);
+}
+
+.dark .normandy-btn-primary:hover {
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 0 16px var(--normandy-orange-glow);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   NAVIGATION
+   Side panel navigation with active state indicators
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  color: var(--normandy-text-secondary);
+  transition: all 0.15s ease;
+  position: relative;
+  border: 1px solid transparent;
+}
+
+.normandy-nav-item:hover {
+  color: var(--normandy-text-primary);
+  background: var(--normandy-cyan-subtle);
+  border-color: rgba(0, 212, 255, 0.1);
+}
+
+.normandy-nav-item-active {
+  color: var(--normandy-orange);
+  background: var(--normandy-orange-subtle);
+  border-color: rgba(255, 123, 0, 0.25);
+}
+
+.dark .normandy-nav-item-active {
+  box-shadow:
+    0 0 10px var(--normandy-orange-glow),
+    inset 0 0 16px rgba(255, 123, 0, 0.03);
+}
+
+/* Active indicator bar */
+.normandy-nav-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: var(--normandy-orange);
+  border-radius: 0 2px 2px 0;
+}
+
+.dark .normandy-nav-item-active::before {
+  box-shadow: 0 0 6px var(--normandy-orange-glow);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   TYPOGRAPHY
+   Clean military/tech typography
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-heading {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--normandy-text-primary);
+}
+
+.normandy-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--normandy-text-muted);
+}
+
+.normandy-mono {
+  font-family: 'Geist Mono', 'SF Mono', 'Roboto Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.normandy-value {
+  font-family: 'Geist Mono', monospace;
+  font-weight: 500;
+  color: var(--normandy-cyan);
+}
+
+.dark .normandy-value {
+  text-shadow: 0 0 6px var(--normandy-cyan-glow);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BADGES
+   Status badges with theme-aware styling
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.normandy-badge-cyan {
+  background: var(--normandy-cyan-subtle);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  color: var(--normandy-cyan);
+}
+
+.normandy-badge-orange {
+  background: var(--normandy-orange-subtle);
+  border: 1px solid rgba(255, 123, 0, 0.25);
+  color: var(--normandy-orange);
+}
+
+.normandy-badge-success {
+  background: rgba(5, 150, 105, 0.1);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+  color: var(--normandy-success);
+}
+
+.normandy-badge-warning {
+  background: rgba(217, 119, 6, 0.1);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  color: var(--normandy-warning);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   DIVIDERS
+   Stylized section dividers
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-divider {
+  height: 1px;
+  background: var(--normandy-border);
+}
+
+.dark .normandy-divider {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--normandy-border) 15%,
+    var(--normandy-cyan-dim) 50%,
+    var(--normandy-border) 85%,
+    transparent 100%
+  );
+  opacity: 0.6;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   INPUTS
+   Command line style inputs
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-input {
+  background: var(--normandy-void);
+  border: 1px solid var(--normandy-border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  color: var(--normandy-text-primary);
+  font-size: 14px;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.normandy-input::placeholder {
+  color: var(--normandy-text-muted);
+}
+
+.normandy-input:focus {
+  outline: none;
+  border-color: var(--normandy-cyan-dim);
+}
+
+.dark .normandy-input:focus {
+  box-shadow:
+    0 0 0 3px rgba(0, 212, 255, 0.08),
+    0 0 10px var(--normandy-cyan-glow);
+}
+
+.light .normandy-input:focus {
+  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.12);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   SCROLLBAR
+   Custom scrollbar to match theme
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.normandy-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.normandy-scroll::-webkit-scrollbar-thumb {
+  background: var(--normandy-surface);
+  border-radius: 3px;
+}
+
+.normandy-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--normandy-cyan-dim);
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   GRID OVERLAY (Dark mode only)
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.dark .normandy-grid {
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.02) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   BOOT SEQUENCE ANIMATION
+   ════════════════════════════════════════════════════════════════════════════ */
+
+@keyframes normandy-boot {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.normandy-boot-in {
+  animation: normandy-boot 0.4s ease forwards;
+}
+
+.normandy-boot-delay-1 { animation-delay: 0.1s; opacity: 0; }
+.normandy-boot-delay-2 { animation-delay: 0.2s; opacity: 0; }
+.normandy-boot-delay-3 { animation-delay: 0.3s; opacity: 0; }
+.normandy-boot-delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   THEME TOGGLE BUTTON
+   ════════════════════════════════════════════════════════════════════════════ */
+
+.normandy-theme-toggle {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--normandy-surface);
+  border: 1px solid var(--normandy-border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.normandy-theme-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--normandy-cyan);
+  transition: transform 0.2s ease;
+}
+
+.dark .normandy-theme-toggle::after {
+  transform: translateX(24px);
+  background: var(--normandy-orange);
+}

@@ -5,6 +5,8 @@ pub mod settings;
 pub mod file_tools;
 pub mod ideas;
 pub mod sops;
+pub mod shot_clock;
+pub mod credentials;
 
 pub use projects::*;
 pub use chat::*;
@@ -13,3 +15,5 @@ pub use settings::*;
 pub use file_tools::*;
 pub use ideas::*;
 pub use sops::*;
+pub use shot_clock::*;
+pub use credentials::*;

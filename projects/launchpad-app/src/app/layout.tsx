@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,13 +26,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased normandy-scanlines normandy-scroll`}
       >
-        <Suspense fallback={null}>
-          <AppShell>{children}</AppShell>
-        </Suspense>
+        <ThemeProvider>
+          <Suspense fallback={null}>
+            <AppShell>{children}</AppShell>
+          </Suspense>
+        </ThemeProvider>
       </body>
     </html>
   );

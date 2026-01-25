@@ -32,3 +32,4 @@ tokio = { version = "1", features = ["full"] }
 walkdir = "2"
 glob = "0.3"
 tauri-plugin-single-instance = "2.3.6"
+keyring = { version = "3", features = ["sync-secret-service"] }

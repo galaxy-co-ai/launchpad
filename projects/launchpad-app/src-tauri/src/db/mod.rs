@@ -12,9 +12,10 @@ impl Database {
         let app_dir = app_handle
             .path()
             .app_data_dir()
-            .expect("Failed to get app data dir");
+            .map_err(|e| rusqlite::Error::InvalidPath(e.to_string().into()))?;
 
-        std::fs::create_dir_all(&app_dir).expect("Failed to create app data dir");
+        std::fs::create_dir_all(&app_dir)
+            .map_err(|e| rusqlite::Error::InvalidPath(e.to_string().into()))?;
 
         let db_path = app_dir.join("launchpad.db");
         let conn = Connection::open(&db_path)?;
@@ -25,7 +26,8 @@ impl Database {
     }
 
     pub fn init(&self) -> Result<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.conn.lock()
+            .map_err(|_| rusqlite::Error::InvalidQuery)?;
 
         // Enable foreign keys
         conn.execute("PRAGMA foreign_keys = ON", [])?;

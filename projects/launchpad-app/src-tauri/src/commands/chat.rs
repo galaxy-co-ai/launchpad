@@ -415,7 +415,7 @@ Be concise, technical, and action-oriented. When you identify actionable items, 
     let max_iterations = 10;
     for _ in 0..max_iterations {
         let mut body = serde_json::json!({
-            "model": "claude-sonnet-4-20250514",
+            "model": "claude-sonnet-4-20250514",  // Claude Sonnet 4 (2025)
             "max_tokens": 4096,
             "system": system,
             "messages": api_messages

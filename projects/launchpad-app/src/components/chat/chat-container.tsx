@@ -6,19 +6,18 @@ import { ChatMessage, TypingIndicator } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { ChatHistory } from "./chat-history";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { GlassCard } from "@/design-system/primitives/glass";
 import {
   Rocket,
-  Sparkles,
   FolderSearch,
   GitBranch,
-  Zap,
   Settings,
   History,
   Plus,
   Download,
-  Search,
+  Terminal,
+  Target,
+  Shield,
+  Radio,
 } from "lucide-react";
 
 interface ChatContainerProps {
@@ -29,40 +28,38 @@ interface ChatContainerProps {
 const suggestedPrompts = [
   {
     icon: FolderSearch,
-    title: "Analyze Project",
-    description: "Scan a project directory and generate a status report",
+    title: "Scan Mission",
+    description: "Analyze project directory and generate intel report",
     prompt: "I want to analyze a project. Can you help me scan a directory and generate a status report?",
   },
   {
     icon: GitBranch,
-    title: "Create New Project",
-    description: "Start a new Micro-SaaS project from scratch",
+    title: "New Mission",
+    description: "Initialize a new Micro-SaaS deployment",
     prompt: "I want to create a new Micro-SaaS project. What information do you need from me to get started?",
   },
   {
-    icon: Zap,
-    title: "Check Roadmap",
-    description: "Review SOP progress for an existing project",
+    icon: Target,
+    title: "Mission Status",
+    description: "Review SOP progress and next objectives",
     prompt: "Show me the current roadmap status and what SOPs I should focus on next.",
   },
   {
     icon: Settings,
-    title: "Setup Help",
-    description: "Get help configuring services and integrations",
+    title: "Systems Config",
+    description: "Configure services and integrations",
     prompt: "I need help setting up integrations. What services do I need to configure for a new project?",
   },
 ];
 
 export function ChatContainer({ projectId, projectName }: ChatContainerProps) {
-  const {
-    messages,
-    sendMessage,
-    sendingMessage,
-    settings,
-    currentConversation,
-    setCurrentConversation,
-    createConversation,
-  } = useAppStore();
+  // Use individual selectors to prevent unnecessary re-renders
+  const messages = useAppStore((state) => state.messages);
+  const sendMessage = useAppStore((state) => state.sendMessage);
+  const sendingMessage = useAppStore((state) => state.sendingMessage);
+  const settings = useAppStore((state) => state.settings);
+  const setCurrentConversation = useAppStore((state) => state.setCurrentConversation);
+  const createConversation = useAppStore((state) => state.createConversation);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
 
@@ -77,8 +74,8 @@ export function ChatContainer({ projectId, projectName }: ChatContainerProps) {
   const handleSend = async (content: string) => {
     try {
       await sendMessage(content);
-    } catch (err) {
-      console.error("Failed to send message:", err);
+    } catch {
+      // Error is already handled in the store
     }
   };
 
@@ -91,14 +88,14 @@ export function ChatContainer({ projectId, projectName }: ChatContainerProps) {
     if (messages.length === 0) return;
 
     const chatContent = messages
-      .map((m) => `## ${m.role === "user" ? "You" : "Launchpad AI"}\n\n${m.content}`)
+      .map((m) => `## ${m.role === "user" ? "Commander" : "Launchpad AI"}\n\n${m.content}`)
       .join("\n\n---\n\n");
 
-    const blob = new Blob([`# Chat Export\n\n${chatContent}`], { type: "text/markdown" });
+    const blob = new Blob([`# Mission Log\n\n${chatContent}`], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `chat-${new Date().toISOString().split("T")[0]}.md`;
+    a.download = `mission-log-${new Date().toISOString().split("T")[0]}.md`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -106,89 +103,100 @@ export function ChatContainer({ projectId, projectName }: ChatContainerProps) {
   const hasApiKey = !!settings.anthropic_api_key;
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <div className="flex h-full overflow-hidden bg-[var(--normandy-void)]">
       {/* Main Chat Area */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Header */}
-        <div className="flex h-14 items-center justify-between border-b border-black/10 dark:border-white/10 bg-background/80 px-4 backdrop-blur-xl">
+        {/* Header - Command Bar */}
+        <div className="flex h-12 items-center justify-between border-b border-[var(--normandy-border)] bg-[var(--normandy-hull)] px-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#3A3A3C] to-[#1C1C1E] shadow-[0_4px_12px_rgba(0,0,0,0.25),0_0_20px_rgba(59,130,246,0.15)]">
-              <Sparkles className="h-4 w-4 text-white" />
+            {/* Status Icon */}
+            <div className="relative flex h-8 w-8 items-center justify-center">
+              <div className="absolute inset-0 rounded bg-[var(--normandy-cyan)] opacity-10" />
+              <div className="absolute inset-0 rounded border border-[var(--normandy-cyan)] opacity-30" />
+              <Terminal className="relative h-4 w-4 text-[var(--normandy-cyan)]" />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-foreground">
-                {projectName ? `${projectName} Chat` : "Launchpad AI"}
+              <h1 className="text-sm font-medium text-[var(--normandy-text-primary)] tracking-wide">
+                {projectName ? projectName.toUpperCase() : "COMMAND TERMINAL"}
               </h1>
-              <p className="text-xs text-muted-foreground">
-                {projectName
-                  ? "Project-aware assistant"
-                  : "Your AI co-founder"}
+              <p className="text-[10px] uppercase tracking-wider text-[var(--normandy-text-muted)]">
+                {projectName ? "Mission Interface" : "AI Co-Pilot Active"}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {messages.length > 0 && (
-              <Button
-                variant="ghost"
-                size="icon"
+              <button
                 onClick={handleExportChat}
-                className="rounded-lg"
-                title="Export chat"
+                className="normandy-btn flex items-center gap-1.5 px-3 py-1.5 text-xs"
+                title="Export log"
+                aria-label="Export chat log as markdown file"
               >
-                <Download className="h-4 w-4" />
-              </Button>
+                <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">Export</span>
+              </button>
             )}
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={handleNewChat}
               disabled={!hasApiKey}
-              className="rounded-lg border-orange-500/30 bg-orange-500/10 text-orange-500 dark:text-orange-400 shadow-[0_0_12px_rgba(249,115,22,0.20)] hover:bg-orange-500/20 hover:shadow-[0_0_20px_rgba(249,115,22,0.30)]"
+              className="normandy-btn normandy-btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs disabled:opacity-50"
+              aria-label="Start new chat session"
             >
-              <Plus className="mr-1.5 h-3.5 w-3.5" />
-              New Chat
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>New Session</span>
+            </button>
+            <button
               onClick={() => setHistoryOpen(!historyOpen)}
-              className="rounded-lg"
+              className="normandy-btn flex items-center justify-center px-2 py-1.5"
+              title="Mission logs"
+              aria-label={historyOpen ? "Close chat history" : "Open chat history"}
+              aria-expanded={historyOpen}
             >
-              <History className="h-4 w-4" />
-            </Button>
+              <History className="h-4 w-4" aria-hidden="true" />
+            </button>
           </div>
         </div>
 
         {/* Messages Area */}
         <ScrollArea className="flex-1 overflow-hidden">
           {messages.length === 0 ? (
-            /* Empty State */
+            /* Empty State - Command Center */
             <div className="flex h-full min-h-[400px] flex-col items-center justify-center px-4 py-12">
-              {/* Gradient Icon */}
-              <div className="relative mb-6">
-                <div className="absolute -inset-4 rounded-3xl bg-blue-500/15 blur-2xl" />
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#3A3A3C] to-[#1C1C1E] shadow-[0_8px_20px_rgba(0,0,0,0.35),0_0_30px_rgba(59,130,246,0.20)]">
-                  <Rocket className="h-8 w-8 text-white" />
+              {/* Normandy Logo */}
+              <div className="relative mb-8">
+                <div className="absolute -inset-8 rounded-full bg-[var(--normandy-orange)] opacity-10 blur-3xl" />
+                <div className="relative flex h-20 w-20 items-center justify-center">
+                  {/* Hexagonal frame effect */}
+                  <div className="absolute inset-0 rounded-xl border-2 border-[var(--normandy-orange)] opacity-40" />
+                  <div className="absolute inset-2 rounded-lg bg-gradient-to-br from-[var(--normandy-orange-subtle)] to-transparent" />
+                  <Rocket className="relative h-10 w-10 text-[var(--normandy-orange)]" />
                 </div>
               </div>
 
-              <h2 className="mb-2 text-2xl font-bold text-foreground">
-                {projectName ? `Chat about ${projectName}` : "Launchpad AI"}
+              <h2 className="normandy-heading mb-2 text-2xl tracking-wide">
+                {projectName ? projectName.toUpperCase() : "LAUNCHPAD COMMAND"}
               </h2>
-              <p className="mb-8 max-w-md text-center text-muted-foreground">
+              <p className="normandy-label mb-8 text-center">
                 {projectName
-                  ? "Ask questions about this project, get help with development, or update your roadmap."
-                  : "Your AI co-founder for shipping Micro-SaaS products. Ask me anything!"}
+                  ? "Mission-aware AI interface ready"
+                  : "Your AI co-founder for shipping Micro-SaaS"}
               </p>
 
               {!hasApiKey && (
-                <div className="mb-8 flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-600 dark:text-amber-400">
-                  <Sparkles className="h-4 w-4 shrink-0" />
-                  <span>Add your Anthropic API key in Settings to enable AI chat</span>
+                <div className="mb-8 flex items-center gap-3 rounded normandy-card px-4 py-3">
+                  <Shield className="h-5 w-5 text-[var(--normandy-warning)]" />
+                  <div>
+                    <p className="text-sm font-medium text-[var(--normandy-warning)]">
+                      API Key Required
+                    </p>
+                    <p className="text-xs text-[var(--normandy-text-muted)]">
+                      Configure Anthropic API key in Settings to enable AI
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {/* Suggested Prompts */}
+              {/* Mission Prompts Grid */}
               <div className="grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-2">
                 {suggestedPrompts.map((item) => {
                   const Icon = item.icon;
@@ -197,14 +205,18 @@ export function ChatContainer({ projectId, projectName }: ChatContainerProps) {
                       key={item.title}
                       onClick={() => handleSend(item.prompt)}
                       disabled={!hasApiKey}
-                      className="group flex items-start gap-3 rounded-2xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 p-4 text-left backdrop-blur-sm transition-all hover:border-blue-500/20 hover:bg-black/10 dark:hover:bg-white/10 hover:shadow-[0_8px_20px_rgba(0,0,0,0.15),0_0_20px_rgba(59,130,246,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
+                      className="group normandy-card-action flex items-start gap-3 p-4 text-left transition-all disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#3A3A3C] to-[#1C1C1E] shadow-[0_4px_12px_rgba(0,0,0,0.25),0_0_12px_rgba(59,130,246,0.10)] transition-transform group-hover:scale-110 group-hover:shadow-[0_4px_12px_rgba(0,0,0,0.25),0_0_20px_rgba(59,130,246,0.20)]">
-                        <Icon className="h-4 w-4 text-white" />
+                      {/* Icon */}
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--normandy-orange)] border-opacity-30 bg-[var(--normandy-orange-subtle)] transition-colors group-hover:border-opacity-60">
+                        <Icon className="h-5 w-5 text-[var(--normandy-orange)]" />
                       </div>
-                      <div>
-                        <div className="text-sm font-semibold text-foreground">{item.title}</div>
-                        <div className="text-xs text-muted-foreground">
+                      {/* Text */}
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-[var(--normandy-text-primary)] group-hover:text-[var(--normandy-orange)]">
+                          {item.title}
+                        </div>
+                        <div className="text-xs text-[var(--normandy-text-muted)]">
                           {item.description}
                         </div>
                       </div>
@@ -212,10 +224,24 @@ export function ChatContainer({ projectId, projectName }: ChatContainerProps) {
                   );
                 })}
               </div>
+
+              {/* Decorative Elements */}
+              <div className="normandy-divider mt-8 w-full max-w-md" />
+              <div className="mt-4 flex items-center gap-2 text-[10px] text-[var(--normandy-text-muted)]">
+                <Radio className="h-3 w-3 text-[var(--normandy-cyan)]" />
+                <span>COMMS READY</span>
+                <span className="opacity-50">•</span>
+                <span>STANDBY FOR ORDERS</span>
+              </div>
             </div>
           ) : (
             /* Messages */
-            <div>
+            <div
+              className="normandy-grid min-h-full"
+              role="log"
+              aria-label="Chat messages"
+              aria-live="polite"
+            >
               {messages.map((message) => (
                 <ChatMessage key={message.id} message={message} />
               ))}
@@ -226,7 +252,7 @@ export function ChatContainer({ projectId, projectName }: ChatContainerProps) {
         </ScrollArea>
 
         {/* Input Area */}
-        <div className="border-t border-black/10 dark:border-white/10 bg-background/80 p-4 backdrop-blur-xl">
+        <div className="border-t border-[var(--normandy-border)] bg-[var(--normandy-hull)] p-4">
           <div className="mx-auto max-w-3xl">
             <ChatInput
               onSend={handleSend}
@@ -235,9 +261,9 @@ export function ChatContainer({ projectId, projectName }: ChatContainerProps) {
               placeholder={
                 hasApiKey
                   ? projectName
-                    ? `Ask about ${projectName}...`
-                    : "Ask me about your projects..."
-                  : "Add API key in Settings to chat"
+                    ? `Orders for ${projectName}...`
+                    : "Enter command..."
+                  : "Configure API key in Settings"
               }
             />
           </div>

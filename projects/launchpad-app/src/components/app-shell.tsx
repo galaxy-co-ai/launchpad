@@ -1,23 +1,40 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { Sidebar } from "@/components/sidebar";
 import { TitleBar } from "@/components/titlebar";
-import { Loader2 } from "lucide-react";
+import { ErrorToast } from "@/components/error-toast";
 
 interface AppShellProps {
   children: React.ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const { fetchSettings, settingsLoading, createConversation, setCurrentConversation } = useAppStore();
+  // Use individual selectors to prevent unnecessary re-renders
+  const fetchSettings = useAppStore((state) => state.fetchSettings);
+  const checkOnboardingStatus = useAppStore((state) => state.checkOnboardingStatus);
+  const hasCompletedOnboarding = useAppStore((state) => state.hasCompletedOnboarding);
+  const onboardingLoading = useAppStore((state) => state.onboardingLoading);
+  const createConversation = useAppStore((state) => state.createConversation);
+  const setCurrentConversation = useAppStore((state) => state.setCurrentConversation);
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isOnboardingPage = pathname === "/onboarding";
 
   useEffect(() => {
     fetchSettings();
-  }, [fetchSettings]);
+    checkOnboardingStatus();
+  }, [fetchSettings, checkOnboardingStatus]);
+
+  // Redirect to onboarding if not completed (and not already there)
+  useEffect(() => {
+    if (!onboardingLoading && !hasCompletedOnboarding && !isOnboardingPage) {
+      router.push("/onboarding");
+    }
+  }, [onboardingLoading, hasCompletedOnboarding, isOnboardingPage, router]);
 
   // Keyboard shortcuts
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -57,6 +74,34 @@ export function AppShell({ children }: AppShellProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // Show loading state while checking onboarding
+  if (onboardingLoading) {
+    return (
+      <div className="flex h-screen flex-col bg-background">
+        <TitleBar />
+        <div className="flex flex-1 items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="normandy-led normandy-led-warning" style={{ width: 16, height: 16 }} />
+            <p className="normandy-mono text-sm text-[var(--normandy-text-muted)]">
+              Initializing...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Onboarding page: no sidebar, minimal chrome
+  if (isOnboardingPage) {
+    return (
+      <div className="flex h-screen flex-col bg-background">
+        <TitleBar />
+        <main className="flex-1 overflow-hidden">{children}</main>
+        <ErrorToast />
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen flex-col bg-background">
       <TitleBar />
@@ -64,6 +109,7 @@ export function AppShell({ children }: AppShellProps) {
         <Sidebar />
         <main className="flex-1 overflow-hidden">{children}</main>
       </div>
+      <ErrorToast />
     </div>
   );
 }

@@ -13,6 +13,8 @@ import type {
   Idea,
   CreateIdeaInput,
   IdeaStatus,
+  AppError,
+  ErrorSeverity,
 } from "./types";
 
 // ============================================
@@ -23,6 +25,10 @@ interface AppState {
   // Settings
   settings: AppSettings;
   settingsLoading: boolean;
+
+  // Onboarding
+  hasCompletedOnboarding: boolean;
+  onboardingLoading: boolean;
 
   // UI State
   sidebarCollapsed: boolean;
@@ -55,9 +61,21 @@ interface AppState {
   ideas: Idea[];
   ideasLoading: boolean;
 
+  // Errors
+  errors: AppError[];
+
+  // Actions - Errors
+  setError: (message: string, severity?: ErrorSeverity, context?: string) => void;
+  clearError: (id: string) => void;
+  clearAllErrors: () => void;
+
   // Actions - Settings
   fetchSettings: () => Promise<void>;
   setSetting: (key: string, value: string) => Promise<void>;
+
+  // Actions - Onboarding
+  checkOnboardingStatus: () => Promise<void>;
+  completeOnboarding: () => Promise<void>;
 
   // Actions - UI
   setSidebarCollapsed: (collapsed: boolean) => void;
@@ -112,6 +130,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   settingsLoading: false,
 
+  hasCompletedOnboarding: false,
+  onboardingLoading: true,
+
   sidebarCollapsed: false,
 
   projects: [],
@@ -136,6 +157,41 @@ export const useAppStore = create<AppState>((set, get) => ({
   ideas: [],
   ideasLoading: false,
 
+  errors: [],
+
+  // ==========================================
+  // Error Actions
+  // ==========================================
+
+  setError: (message: string, severity: ErrorSeverity = "error", context?: string) => {
+    const error: AppError = {
+      id: crypto.randomUUID(),
+      message,
+      severity,
+      context,
+      timestamp: new Date().toISOString(),
+    };
+    set((state) => ({
+      errors: [...state.errors, error],
+    }));
+    // Auto-dismiss non-critical errors after 8 seconds
+    if (severity !== "critical") {
+      setTimeout(() => {
+        get().clearError(error.id);
+      }, 8000);
+    }
+  },
+
+  clearError: (id: string) => {
+    set((state) => ({
+      errors: state.errors.filter((e) => e.id !== id),
+    }));
+  },
+
+  clearAllErrors: () => {
+    set({ errors: [] });
+  },
+
   // ==========================================
   // Settings Actions
   // ==========================================
@@ -146,7 +202,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const settings = await invoke<AppSettings>("get_all_settings");
       set({ settings, settingsLoading: false });
     } catch (err) {
-      console.error("Failed to fetch settings:", err);
+      get().setError(`Failed to fetch settings: ${err}`, "error", "settings");
       set({ settingsLoading: false });
     }
   },
@@ -162,7 +218,38 @@ export const useAppStore = create<AppState>((set, get) => ({
         },
       }));
     } catch (err) {
-      console.error("Failed to set setting:", err);
+      get().setError(`Failed to save setting: ${err}`, "error", "settings");
+      throw err;
+    }
+  },
+
+  // ==========================================
+  // Onboarding Actions
+  // ==========================================
+
+  checkOnboardingStatus: async () => {
+    set({ onboardingLoading: true });
+    try {
+      const result = await invoke<string | null>("get_setting", { key: "has_completed_onboarding" });
+      set({
+        hasCompletedOnboarding: result === "true",
+        onboardingLoading: false,
+      });
+    } catch {
+      // If setting doesn't exist, user hasn't completed onboarding
+      set({
+        hasCompletedOnboarding: false,
+        onboardingLoading: false,
+      });
+    }
+  },
+
+  completeOnboarding: async () => {
+    try {
+      await invoke("set_setting", { key: "has_completed_onboarding", value: "true" });
+      set({ hasCompletedOnboarding: true });
+    } catch (err) {
+      get().setError(`Failed to save onboarding status: ${err}`, "error", "onboarding");
       throw err;
     }
   },
@@ -175,7 +262,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ sidebarCollapsed: collapsed });
     // Persist to settings
     invoke("set_setting", { key: "sidebar_collapsed", value: String(collapsed) }).catch(
-      (err) => console.error("Failed to persist sidebar state:", err)
+      (err) => get().setError(`Failed to persist sidebar state: ${err}`, "warning", "ui")
     );
   },
 
@@ -189,7 +276,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const projects = await invoke<Project[]>("list_projects");
       set({ projects, projectsLoading: false });
     } catch (err) {
-      console.error("Failed to fetch projects:", err);
+      get().setError(`Failed to fetch projects: ${err}`, "error", "projects");
       set({ projectsLoading: false });
     }
   },
@@ -202,7 +289,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
       return project;
     } catch (err) {
-      console.error("Failed to get project:", err);
+      get().setError(`Failed to get project: ${err}`, "error", "projects");
       return null;
     }
   },
@@ -215,7 +302,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       }));
       return project;
     } catch (err) {
-      console.error("Failed to create project:", err);
+      get().setError(`Failed to create project: ${err}`, "error", "projects");
       throw err;
     }
   },
@@ -238,7 +325,7 @@ export const useAppStore = create<AppState>((set, get) => ({
             : state.currentProject,
       }));
     } catch (err) {
-      console.error("Failed to update project:", err);
+      get().setError(`Failed to update project: ${err}`, "error", "projects");
       throw err;
     }
   },
@@ -252,7 +339,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           state.currentProject?.id === id ? null : state.currentProject,
       }));
     } catch (err) {
-      console.error("Failed to delete project:", err);
+      get().setError(`Failed to delete project: ${err}`, "error", "projects");
       throw err;
     }
   },
@@ -271,7 +358,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const roadmap = await invoke<RoadmapItem[]>("get_roadmap", { projectId });
       set({ roadmap, roadmapLoading: false });
     } catch (err) {
-      console.error("Failed to fetch roadmap:", err);
+      get().setError(`Failed to fetch roadmap: ${err}`, "error", "roadmap");
       set({ roadmapLoading: false });
     }
   },
@@ -291,7 +378,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         ),
       }));
     } catch (err) {
-      console.error("Failed to update roadmap item:", err);
+      get().setError(`Failed to update roadmap item: ${err}`, "error", "roadmap");
       throw err;
     }
   },
@@ -308,7 +395,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       });
       set({ conversations, chatLoading: false });
     } catch (err) {
-      console.error("Failed to fetch conversations:", err);
+      get().setError(`Failed to fetch conversations: ${err}`, "error", "chat");
       set({ chatLoading: false });
     }
   },
@@ -326,7 +413,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       }));
       return conversation;
     } catch (err) {
-      console.error("Failed to create conversation:", err);
+      get().setError(`Failed to create conversation: ${err}`, "error", "chat");
       throw err;
     }
   },
@@ -345,7 +432,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       });
       set({ messages });
     } catch (err) {
-      console.error("Failed to fetch messages:", err);
+      get().setError(`Failed to fetch messages: ${err}`, "error", "chat");
     }
   },
 
@@ -467,7 +554,7 @@ ${roadmapStatus}
         sendingMessage: false,
       }));
     } catch (err) {
-      console.error("Failed to send message:", err);
+      get().setError(`Failed to send message: ${err}`, "error", "chat");
       set({ sendingMessage: false });
       throw err;
     }
@@ -483,7 +570,7 @@ ${roadmapStatus}
         messages: state.currentConversation?.id === id ? [] : state.messages,
       }));
     } catch (err) {
-      console.error("Failed to delete conversation:", err);
+      get().setError(`Failed to delete conversation: ${err}`, "error", "chat");
       throw err;
     }
   },
@@ -499,7 +586,7 @@ ${roadmapStatus}
       set({ currentAnalysis: analysis, analyzing: false });
       return analysis;
     } catch (err) {
-      console.error("Failed to analyze project:", err);
+      get().setError(`Failed to analyze project: ${err}`, "error", "analyzer");
       set({ analyzing: false });
       throw err;
     }
@@ -522,7 +609,7 @@ ${roadmapStatus}
         ),
       }));
     } catch (err) {
-      console.error("Failed to save analysis:", err);
+      get().setError(`Failed to save analysis: ${err}`, "error", "analyzer");
       throw err;
     }
   },
@@ -537,7 +624,7 @@ ${roadmapStatus}
       const sops = await invoke<SOP[]>("list_sops", { activeOnly: activeOnly ?? false });
       set({ sops, sopsLoading: false });
     } catch (err) {
-      console.error("Failed to fetch SOPs:", err);
+      get().setError(`Failed to fetch SOPs: ${err}`, "error", "sops");
       set({ sopsLoading: false });
     }
   },
@@ -547,7 +634,7 @@ ${roadmapStatus}
       const sop = await invoke<SOP | null>("get_sop", { sopNumber, version: version ?? null });
       return sop;
     } catch (err) {
-      console.error("Failed to get SOP:", err);
+      get().setError(`Failed to get SOP: ${err}`, "error", "sops");
       return null;
     }
   },
@@ -560,7 +647,7 @@ ${roadmapStatus}
       }));
       return sop;
     } catch (err) {
-      console.error("Failed to create SOP version:", err);
+      get().setError(`Failed to create SOP version: ${err}`, "error", "sops");
       throw err;
     }
   },
@@ -574,7 +661,7 @@ ${roadmapStatus}
         ),
       }));
     } catch (err) {
-      console.error("Failed to archive SOP version:", err);
+      get().setError(`Failed to archive SOP version: ${err}`, "error", "sops");
       throw err;
     }
   },
@@ -584,7 +671,7 @@ ${roadmapStatus}
       const versions = await invoke<SOP[]>("get_sop_versions", { sopNumber });
       return versions;
     } catch (err) {
-      console.error("Failed to get SOP versions:", err);
+      get().setError(`Failed to get SOP versions: ${err}`, "error", "sops");
       return [];
     }
   },
@@ -595,7 +682,7 @@ ${roadmapStatus}
       // Refresh SOPs after initialization
       get().fetchSOPs();
     } catch (err) {
-      console.error("Failed to initialize default SOPs:", err);
+      get().setError(`Failed to initialize default SOPs: ${err}`, "error", "sops");
     }
   },
 
@@ -609,7 +696,7 @@ ${roadmapStatus}
       const ideas = await invoke<Idea[]>("list_ideas", { status: status ?? null });
       set({ ideas, ideasLoading: false });
     } catch (err) {
-      console.error("Failed to fetch ideas:", err);
+      get().setError(`Failed to fetch ideas: ${err}`, "error", "ideas");
       set({ ideasLoading: false });
     }
   },
@@ -619,7 +706,7 @@ ${roadmapStatus}
       const idea = await invoke<Idea | null>("get_idea", { id });
       return idea;
     } catch (err) {
-      console.error("Failed to get idea:", err);
+      get().setError(`Failed to get idea: ${err}`, "error", "ideas");
       return null;
     }
   },
@@ -632,7 +719,7 @@ ${roadmapStatus}
       }));
       return idea;
     } catch (err) {
-      console.error("Failed to create idea:", err);
+      get().setError(`Failed to create idea: ${err}`, "error", "ideas");
       throw err;
     }
   },
@@ -646,7 +733,7 @@ ${roadmapStatus}
         ),
       }));
     } catch (err) {
-      console.error("Failed to update idea status:", err);
+      get().setError(`Failed to update idea status: ${err}`, "error", "ideas");
       throw err;
     }
   },
@@ -662,7 +749,7 @@ ${roadmapStatus}
         ),
       }));
     } catch (err) {
-      console.error("Failed to save idea audit:", err);
+      get().setError(`Failed to save idea audit: ${err}`, "error", "ideas");
       throw err;
     }
   },
@@ -674,7 +761,7 @@ ${roadmapStatus}
         ideas: state.ideas.filter((i) => i.id !== id),
       }));
     } catch (err) {
-      console.error("Failed to delete idea:", err);
+      get().setError(`Failed to delete idea: ${err}`, "error", "ideas");
       throw err;
     }
   },

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Send, Loader2, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ChatInputProps {
@@ -16,7 +15,7 @@ export function ChatInput({
   onSend,
   disabled = false,
   loading = false,
-  placeholder = "Type your message...",
+  placeholder = "Enter command...",
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -48,15 +47,15 @@ export function ChatInput({
   return (
     <div
       className={cn(
-        "relative flex items-end gap-2 rounded-2xl border bg-card p-3 shadow-sm transition-all duration-200",
-        isFocused
-          ? "border-primary/50 ring-2 ring-primary/20"
-          : "border-border",
-        disabled && "opacity-60"
+        "normandy-panel relative flex items-end gap-3 p-3 transition-all duration-200",
+        isFocused && "normandy-panel-active",
+        disabled && "opacity-50"
       )}
     >
-      {/* Subtle gradient accent */}
-      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/5 via-transparent to-blue-500/5 opacity-0 transition-opacity duration-300 group-focus-within:opacity-100" />
+      {/* Command prompt indicator */}
+      <div className="flex items-center gap-2 self-center pl-1">
+        <span className="text-xs font-bold text-[var(--normandy-orange)] normandy-mono">{">"}</span>
+      </div>
 
       <div className="flex-1">
         <textarea
@@ -69,26 +68,25 @@ export function ChatInput({
           placeholder={placeholder}
           disabled={disabled || loading}
           rows={1}
-          className="w-full resize-none bg-transparent px-1 py-1.5 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+          className="w-full resize-none bg-transparent px-1 py-1.5 text-sm text-[var(--normandy-text-primary)] outline-none placeholder:text-[var(--normandy-text-muted)] disabled:cursor-not-allowed normandy-mono"
         />
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {loading && (
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Sparkles className="h-3 w-3 animate-pulse text-primary" />
-            <span>Thinking...</span>
+          <div className="flex items-center gap-2 text-xs">
+            <Radio className="h-3 w-3 animate-pulse text-[var(--normandy-cyan)]" />
+            <span className="text-[var(--normandy-cyan)] uppercase tracking-wider">Transmitting</span>
           </div>
         )}
-        <Button
+        <button
           onClick={handleSubmit}
           disabled={!message.trim() || disabled || loading}
-          size="sm"
           className={cn(
-            "shrink-0 rounded-xl transition-all",
+            "normandy-btn flex h-9 w-9 shrink-0 items-center justify-center rounded transition-all",
             message.trim() && !disabled && !loading
-              ? "bg-primary hover:bg-primary/90"
-              : "bg-muted text-muted-foreground"
+              ? "normandy-btn-primary"
+              : "opacity-50 cursor-not-allowed"
           )}
         >
           {loading ? (
@@ -96,7 +94,7 @@ export function ChatInput({
           ) : (
             <Send className="h-4 w-4" />
           )}
-        </Button>
+        </button>
       </div>
     </div>
   );

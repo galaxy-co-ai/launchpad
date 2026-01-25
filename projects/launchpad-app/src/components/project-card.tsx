@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import type { Project } from "@/lib/types";
 import { useAppStore } from "@/lib/store";
@@ -13,8 +14,7 @@ import {
   GitBranch,
   Folder,
   CheckCircle,
-  Circle,
-  Clock,
+  Target,
 } from "lucide-react";
 
 interface ProjectCardProps {
@@ -24,13 +24,13 @@ interface ProjectCardProps {
   className?: string;
 }
 
-export function ProjectCard({
+export const ProjectCard = memo(function ProjectCard({
   project,
   onEdit,
   onDelete,
   className,
 }: ProjectCardProps) {
-  const { deleteProject } = useAppStore();
+  const deleteProject = useAppStore((state) => state.deleteProject);
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -57,103 +57,79 @@ export function ProjectCard({
   const completedPhases = project.current_phase;
   const progressPercent = Math.round((completedPhases / totalPhases) * 100);
 
-  // Get phase status color
-  const getPhaseColor = () => {
-    if (completedPhases >= 10) return "from-green-500 to-emerald-600";
-    if (completedPhases >= 5) return "from-blue-500 to-indigo-600";
-    return "from-amber-500 to-orange-600";
+  // Get phase status using Normandy colors
+  const getPhaseStatus = () => {
+    if (completedPhases >= 10) return {
+      ledClass: "normandy-led-online",
+      badgeClass: "normandy-badge-success",
+      progressClass: "bg-[var(--normandy-success)]",
+      label: "Complete"
+    };
+    if (completedPhases >= 5) return {
+      ledClass: "normandy-led-warning",
+      badgeClass: "normandy-badge-cyan",
+      progressClass: "bg-[var(--normandy-cyan)]",
+      label: "In Progress"
+    };
+    return {
+      ledClass: "normandy-led-offline",
+      badgeClass: "normandy-badge-orange",
+      progressClass: "bg-[var(--normandy-orange)]",
+      label: "Early Stage"
+    };
   };
 
-  // Get glow color based on phase
-  const getGlowColor = () => {
-    if (completedPhases >= 10) return "rgba(34, 197, 94, 0.2)";
-    if (completedPhases >= 5) return "rgba(59, 130, 246, 0.2)";
-    return "rgba(249, 115, 22, 0.2)";
-  };
+  const phaseStatus = getPhaseStatus();
 
   return (
     <Link href={`/project?slug=${project.slug}`}>
       <div
         className={cn(
-          // Base card styling
-          "group relative overflow-hidden rounded-2xl",
-          "border border-blue-500/20",
-          "bg-gradient-to-br from-zinc-900/95 to-zinc-950/95",
+          // Normandy card styling
+          "normandy-card group relative overflow-hidden",
           "p-[1px]",
-          // Ambient glow
-          "shadow-[0_0_30px_rgba(59,130,246,0.15)]",
           // Hover effects
           "transition-all duration-300",
-          "hover:shadow-[0_0_40px_rgba(59,130,246,0.25)]",
-          "hover:border-blue-500/40",
           "hover:-translate-y-1",
           className
         )}
       >
-        {/* Inner gradient border effect */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
-
         {/* Card content */}
-        <div className="relative rounded-[14px] bg-zinc-900/90 p-5">
+        <div className="relative p-5">
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              {/* Project icon */}
-              <div
-                className={cn(
-                  "flex h-12 w-12 items-center justify-center rounded-xl",
-                  "bg-gradient-to-br",
-                  getPhaseColor(),
-                  "shadow-lg"
-                )}
-                style={{ boxShadow: `0 4px 20px ${getGlowColor()}` }}
-              >
-                <Rocket className="h-6 w-6 text-white" />
+              {/* Mission icon */}
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-[var(--normandy-orange)]/30 bg-[var(--normandy-orange-subtle)] shadow-[0_0_12px_var(--normandy-orange-glow)]">
+                <Target className="h-6 w-6 text-[var(--normandy-orange)]" />
               </div>
 
               <div>
-                <h3 className="font-semibold text-foreground group-hover:text-blue-400 transition-colors">
+                <h3 className="font-semibold text-[var(--normandy-text-primary)] group-hover:text-[var(--normandy-cyan)] transition-colors">
                   {project.name}
                 </h3>
-                <p className="text-xs text-muted-foreground">
-                  {SOP_NAMES[completedPhases] || "Completed"}
+                <p className="text-xs text-[var(--normandy-text-muted)] normandy-mono">
+                  {SOP_NAMES[completedPhases] || "Mission Complete"}
                 </p>
               </div>
             </div>
 
             {/* Phase indicator */}
-            <div
-              className={cn(
-                "flex items-center gap-1.5 rounded-full px-2.5 py-1",
-                "text-xs font-medium",
-                completedPhases >= 10
-                  ? "bg-green-500/10 text-green-400"
-                  : completedPhases >= 5
-                  ? "bg-blue-500/10 text-blue-400"
-                  : "bg-amber-500/10 text-amber-400"
-              )}
-            >
-              {completedPhases >= 10 ? (
-                <CheckCircle className="h-3 w-3" />
-              ) : (
-                <Clock className="h-3 w-3" />
-              )}
+            <div className={cn("normandy-badge", phaseStatus.badgeClass)}>
+              <div className={cn("normandy-led", phaseStatus.ledClass)} />
               Phase {completedPhases + 1}
             </div>
           </div>
 
-          {/* Progress bar */}
+          {/* Progress bar - Normandy style */}
           <div className="mt-4">
             <div className="mb-1.5 flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Progress</span>
-              <span className="font-medium text-foreground">{progressPercent}%</span>
+              <span className="normandy-label">Mission Progress</span>
+              <span className="normandy-value text-sm">{progressPercent}%</span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+            <div className="normandy-progress">
               <div
-                className={cn(
-                  "h-full rounded-full bg-gradient-to-r transition-all duration-500",
-                  getPhaseColor()
-                )}
+                className={cn("normandy-progress-fill", phaseStatus.progressClass)}
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -167,35 +143,35 @@ export function ProjectCard({
                 className={cn(
                   "h-1.5 flex-1 rounded-full transition-colors",
                   index < completedPhases
-                    ? "bg-blue-500"
+                    ? "bg-[var(--normandy-cyan)]"
                     : index === completedPhases
-                    ? "bg-blue-500/50"
-                    : "bg-zinc-700"
+                    ? "bg-[var(--normandy-cyan)]/50"
+                    : "bg-[var(--normandy-surface)]"
                 )}
               />
             ))}
           </div>
 
           {/* Metadata */}
-          <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+          <div className="mt-4 flex items-center gap-4 text-xs text-[var(--normandy-text-muted)]">
             {project.local_path && (
               <div className="flex items-center gap-1.5">
                 <Folder className="h-3.5 w-3.5" />
-                <span className="max-w-[100px] truncate">
+                <span className="max-w-[100px] truncate normandy-mono">
                   {project.local_path.split(/[/\\]/).pop()}
                 </span>
               </div>
             )}
             {project.github_url && (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 text-[var(--normandy-cyan)]">
                 <GitBranch className="h-3.5 w-3.5" />
-                <span>Connected</span>
+                <span>Linked</span>
               </div>
             )}
             {project.last_analyzed && (
-              <div className="flex items-center gap-1.5">
-                <CheckCircle className="h-3.5 w-3.5 text-green-400" />
-                <span>Analyzed</span>
+              <div className="flex items-center gap-1.5 text-[var(--normandy-success)]">
+                <CheckCircle className="h-3.5 w-3.5" />
+                <span>Scanned</span>
               </div>
             )}
           </div>
@@ -207,52 +183,39 @@ export function ProjectCard({
               "opacity-0 transition-opacity duration-200",
               "group-hover:opacity-100"
             )}
+            role="group"
+            aria-label={`Actions for ${project.name}`}
           >
             <button
               onClick={(e) => e.preventDefault()}
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-lg",
-                "bg-zinc-800/80 backdrop-blur-sm",
-                "border border-white/10",
-                "text-muted-foreground hover:text-blue-400",
-                "transition-colors"
-              )}
+              className="normandy-btn p-2"
               title="View"
+              aria-label={`View ${project.name}`}
             >
-              <Eye className="h-4 w-4" />
+              <Eye className="h-4 w-4" aria-hidden="true" />
             </button>
             <button
               onClick={handleEdit}
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-lg",
-                "bg-zinc-800/80 backdrop-blur-sm",
-                "border border-white/10",
-                "text-muted-foreground hover:text-amber-400",
-                "transition-colors"
-              )}
+              className="normandy-btn p-2 hover:text-[var(--normandy-warning)]"
               title="Edit"
+              aria-label={`Edit ${project.name}`}
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-4 w-4" aria-hidden="true" />
             </button>
             <button
               onClick={handleDelete}
-              className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-lg",
-                "bg-zinc-800/80 backdrop-blur-sm",
-                "border border-white/10",
-                "text-muted-foreground hover:text-red-400",
-                "transition-colors"
-              )}
+              className="normandy-btn p-2 hover:text-[var(--normandy-danger)]"
               title="Delete"
+              aria-label={`Delete ${project.name}`}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
         </div>
       </div>
     </Link>
   );
-}
+});
 
 // Grid component for multiple cards
 interface ProjectCardGridProps {
@@ -271,12 +234,12 @@ export function ProjectCardGrid({
   if (projects.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-800/50">
-          <Rocket className="h-8 w-8 text-muted-foreground" />
+        <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-[var(--normandy-cyan)]/20 bg-[var(--normandy-cyan-subtle)]">
+          <Rocket className="h-8 w-8 text-[var(--normandy-cyan)]/50" />
         </div>
-        <h3 className="mt-4 font-semibold text-foreground">No projects yet</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Create your first project to get started
+        <h3 className="mt-4 normandy-heading text-[var(--normandy-text-primary)]">No active missions</h3>
+        <p className="mt-1 text-sm text-[var(--normandy-text-muted)]">
+          Initialize a new mission to begin operations
         </p>
       </div>
     );

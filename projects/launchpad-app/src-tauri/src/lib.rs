@@ -9,6 +9,8 @@ use tauri::{
 use commands::{
     // Settings
     get_setting, set_setting, get_all_settings,
+    // Credentials (secure API key storage)
+    set_api_key, get_api_key, delete_api_key, has_api_key,
     // Projects
     list_projects, get_project, create_project, update_project, delete_project,
     get_roadmap, update_roadmap_item,
@@ -23,6 +25,9 @@ use commands::{
     list_ideas, get_idea, create_idea, update_idea_status, save_idea_audit, delete_idea,
     // SOPs
     list_sops, get_sop, create_sop_version, archive_sop_version, get_sop_versions, init_default_sops,
+    // Shot Clock
+    get_shot_clock, list_shot_clocks, start_shot_clock, update_shot_clock_time,
+    add_bonus_time, complete_shot_clock, lock_shot_clock, delete_shot_clock, init_project_shot_clocks,
 };
 use db::Database;
 
@@ -43,8 +48,9 @@ pub fn run() {
         .setup(|app| {
             // Initialize database
             let db = Database::new(&app.handle())
-                .expect("Failed to initialize database");
-            db.init().expect("Failed to run database migrations");
+                .map_err(|e| format!("Failed to initialize database: {}", e))?;
+            db.init()
+                .map_err(|e| format!("Failed to run database migrations: {}", e))?;
             app.manage(db);
 
             // Focus main window on startup
@@ -59,8 +65,11 @@ pub fn run() {
 
             let menu = Menu::with_items(app, &[&show_item, &quit_item])?;
 
+            let icon = app.default_window_icon()
+                .ok_or("Failed to load default window icon")?
+                .clone();
             let _tray = TrayIconBuilder::new()
-                .icon(app.default_window_icon().unwrap().clone())
+                .icon(icon)
                 .menu(&menu)
                 .tooltip("Launchpad - AI-Powered Project Launcher")
                 .on_menu_event(|app, event| {
@@ -106,6 +115,11 @@ pub fn run() {
             get_setting,
             set_setting,
             get_all_settings,
+            // Credentials (secure API key storage)
+            set_api_key,
+            get_api_key,
+            delete_api_key,
+            has_api_key,
             // Projects
             list_projects,
             get_project,
@@ -143,6 +157,16 @@ pub fn run() {
             archive_sop_version,
             get_sop_versions,
             init_default_sops,
+            // Shot Clock
+            get_shot_clock,
+            list_shot_clocks,
+            start_shot_clock,
+            update_shot_clock_time,
+            add_bonus_time,
+            complete_shot_clock,
+            lock_shot_clock,
+            delete_shot_clock,
+            init_project_shot_clocks,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

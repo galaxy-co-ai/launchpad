@@ -3,30 +3,28 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
-import { SOP_NAMES } from "@/lib/types";
-import type { Project, RoadmapItem, ProjectAnalysis } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import type { RoadmapItem, ProjectAnalysis } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatContainer } from "@/components/chat/chat-container";
-import { GlassCard, GlassAccentCard } from "@/design-system/primitives/glass";
+import { AIGuidance } from "@/components/ai-guidance";
 import { open } from "@tauri-apps/plugin-shell";
 import {
   ArrowLeft,
-  Bot,
   RefreshCw,
   FolderOpen,
   Github,
   Loader2,
   Check,
-  Circle,
   Play,
   ChevronRight,
   Sparkles,
   AlertCircle,
   MessageSquare,
-  Map,
   Rocket,
+  Target,
+  Shield,
+  Cpu,
+  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +48,7 @@ export default function ProjectPage() {
 
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [activeTab, setActiveTab] = useState("roadmap");
 
   useEffect(() => {
     const loadProject = async () => {
@@ -67,7 +66,6 @@ export default function ProjectPage() {
     loadProject();
   }, [slug, getProject, fetchRoadmap]);
 
-  // Parse stored analysis
   const analysis: ProjectAnalysis | null = currentProject?.status_report
     ? JSON.parse(currentProject.status_report)
     : currentAnalysis;
@@ -109,69 +107,76 @@ export default function ProjectPage() {
     await updateRoadmapItem(item.id, nextStatus);
   };
 
-  // Calculate progress
   const completedItems = roadmap.filter((item) => item.status === "complete").length;
   const totalItems = roadmap.length;
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
 
   if (!slug) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4">
-        <AlertCircle className="h-12 w-12 text-muted-foreground" />
-        <p className="text-muted-foreground">No project selected</p>
-        <Button variant="outline" onClick={() => router.push("/")}>
-          Go Home
-        </Button>
+      <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--normandy-void)]">
+        <AlertCircle className="h-12 w-12 text-[var(--normandy-warning)]" />
+        <p className="text-[var(--normandy-text-muted)]">No mission selected</p>
+        <button onClick={() => router.push("/")} className="normandy-btn">
+          Return to Command
+        </button>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <div className="flex h-full items-center justify-center bg-[var(--normandy-void)]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-[var(--normandy-cyan)]" />
+          <span className="text-xs uppercase tracking-wider text-[var(--normandy-text-muted)]">
+            Loading Mission Data
+          </span>
+        </div>
       </div>
     );
   }
 
   if (!currentProject) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4">
-        <AlertCircle className="h-12 w-12 text-muted-foreground" />
-        <p className="text-muted-foreground">Project not found</p>
-        <Button variant="outline" onClick={() => router.push("/")}>
-          Go Home
-        </Button>
+      <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--normandy-void)]">
+        <AlertCircle className="h-12 w-12 text-[var(--normandy-danger)]" />
+        <p className="text-[var(--normandy-text-muted)]">Mission not found</p>
+        <button onClick={() => router.push("/")} className="normandy-btn">
+          Return to Command
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="flex items-start justify-between border-b border-black/10 dark:border-white/10 bg-background/80 px-6 py-4 backdrop-blur-xl">
+    <div className="flex h-full flex-col bg-[var(--normandy-void)]">
+      {/* Header - Mission Briefing Bar */}
+      <div className="flex items-start justify-between border-b border-[var(--normandy-border)] bg-[var(--normandy-hull)] px-6 py-4">
         <div>
           <button
             onClick={() => router.back()}
-            className="mb-2 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="mb-2 inline-flex items-center gap-1 text-xs uppercase tracking-wider text-[var(--normandy-text-muted)] hover:text-[var(--normandy-cyan)] transition-colors"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-3 w-3" />
             Back
           </button>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#3A3A3C] to-[#1C1C1E] shadow-[0_4px_12px_rgba(0,0,0,0.25),0_0_20px_rgba(59,130,246,0.15)]">
-              <Rocket className="h-5 w-5 text-white" />
+          <div className="flex items-center gap-4">
+            {/* Mission Icon */}
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center">
+              <div className="absolute inset-0 rounded-lg bg-[var(--normandy-orange)] opacity-15" />
+              <div className="absolute inset-0 rounded-lg border-2 border-[var(--normandy-orange)] opacity-50" />
+              <Rocket className="relative h-6 w-6 text-[var(--normandy-orange)]" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">{currentProject.name}</h1>
-              <div className="mt-0.5 flex items-center gap-3 text-sm text-muted-foreground">
+              <h1 className="normandy-heading text-xl tracking-wide">{currentProject.name.toUpperCase()}</h1>
+              <div className="mt-1 flex items-center gap-4 text-xs text-[var(--normandy-text-muted)]">
                 {currentProject.local_path && (
                   <button
                     onClick={handleOpenFolder}
-                    className="flex items-center gap-1 hover:text-blue-400 transition-colors"
+                    className="flex items-center gap-1 hover:text-[var(--normandy-cyan)] transition-colors"
                   >
-                    <FolderOpen className="h-4 w-4" />
-                    Open Folder
+                    <FolderOpen className="h-3.5 w-3.5" />
+                    <span className="uppercase tracking-wider">Open</span>
                   </button>
                 )}
                 {currentProject.github_url && (
@@ -179,10 +184,10 @@ export default function ProjectPage() {
                     href={currentProject.github_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 hover:text-blue-400 transition-colors"
+                    className="flex items-center gap-1 hover:text-[var(--normandy-cyan)] transition-colors"
                   >
-                    <Github className="h-4 w-4" />
-                    GitHub
+                    <Github className="h-3.5 w-3.5" />
+                    <span className="uppercase tracking-wider">GitHub</span>
                   </a>
                 )}
               </div>
@@ -190,151 +195,155 @@ export default function ProjectPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
+          <button
             onClick={handleSync}
             disabled={syncing}
-            className="border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"
+            className="normandy-btn flex items-center gap-2 px-3 py-2 text-xs"
           >
             <RefreshCw className={cn("h-4 w-4", syncing && "animate-spin")} />
-          </Button>
+            <span className="hidden sm:inline">Sync</span>
+          </button>
           {currentProject.local_path && (
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={handleAnalyze}
               disabled={analyzing}
-              className="border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10"
+              className="normandy-btn normandy-btn-primary flex items-center gap-2 px-3 py-2 text-xs"
             >
               {analyzing ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Bot className="mr-2 h-4 w-4" />
+                <Cpu className="h-4 w-4" />
               )}
-              Analyze
-            </Button>
+              <span>Analyze</span>
+            </button>
           )}
         </div>
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="roadmap" className="flex flex-1 flex-col overflow-hidden">
-        <div className="border-b border-black/10 dark:border-white/10 px-6">
-          <TabsList className="h-10 bg-transparent p-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col overflow-hidden">
+        <div className="border-b border-[var(--normandy-border)] bg-[var(--normandy-hull)] px-6">
+          <TabsList className="h-10 bg-transparent p-0 gap-1">
             <TabsTrigger
               value="roadmap"
-              className="relative h-10 rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground shadow-none transition-none data-[state=active]:border-b-orange-500 data-[state=active]:text-orange-500 dark:data-[state=active]:text-orange-400 data-[state=active]:shadow-none"
+              className="relative h-10 rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 text-xs font-medium uppercase tracking-wider text-[var(--normandy-text-muted)] transition-all data-[state=active]:border-b-[var(--normandy-orange)] data-[state=active]:text-[var(--normandy-orange)]"
             >
-              <Map className="mr-2 h-4 w-4" />
-              Roadmap
+              <Target className="mr-2 h-4 w-4" />
+              Objectives
             </TabsTrigger>
             <TabsTrigger
               value="chat"
-              className="relative h-10 rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 font-medium text-muted-foreground shadow-none transition-none data-[state=active]:border-b-orange-500 data-[state=active]:text-orange-500 dark:data-[state=active]:text-orange-400 data-[state=active]:shadow-none"
+              className="relative h-10 rounded-none border-b-2 border-b-transparent bg-transparent px-4 pb-3 pt-2 text-xs font-medium uppercase tracking-wider text-[var(--normandy-text-muted)] transition-all data-[state=active]:border-b-[var(--normandy-orange)] data-[state=active]:text-[var(--normandy-orange)]"
             >
               <MessageSquare className="mr-2 h-4 w-4" />
-              Chat
+              Comms
             </TabsTrigger>
           </TabsList>
         </div>
 
-        <TabsContent value="roadmap" className="flex-1 overflow-y-auto mt-0">
+        <TabsContent value="roadmap" className="flex-1 overflow-y-auto mt-0 normandy-scroll">
           <div className="mx-auto max-w-4xl p-6">
-            {/* Progress & Status */}
+            {/* Mission Status Cards */}
             <div className="mb-6 grid gap-4 md:grid-cols-2">
               {/* Progress Card */}
-              <GlassCard intensity="subtle">
-                <p className="text-sm font-medium text-muted-foreground mb-3">
-                  Overall Progress
-                </p>
+              <div className="normandy-card p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Activity className="h-4 w-4 text-[var(--normandy-cyan)]" />
+                  <span className="normandy-label">Mission Progress</span>
+                </div>
                 <div className="flex items-end gap-4">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-200 to-blue-400 bg-clip-text text-transparent">
+                  <div className="normandy-value text-4xl">
                     {progressPercent}%
                   </div>
-                  <div className="pb-1 text-sm text-muted-foreground">
-                    {completedItems} of {totalItems} SOPs complete
+                  <div className="pb-1 text-sm text-[var(--normandy-text-secondary)]">
+                    {completedItems} of {totalItems} objectives
                   </div>
                 </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
+                <div className="normandy-progress mt-4">
                   <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-blue-400 transition-all duration-300"
+                    className="normandy-progress-fill"
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
-              </GlassCard>
+              </div>
 
-              {/* Analysis Card */}
-              <GlassAccentCard>
-                <p className="text-sm font-medium text-blue-300 mb-3">
-                  AI Analysis
-                </p>
+              {/* Intel Card */}
+              <div className="normandy-card-action p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Cpu className="h-4 w-4 text-[var(--normandy-orange)]" />
+                  <span className="normandy-label text-[var(--normandy-orange)]">Intel Report</span>
+                </div>
                 {analysis ? (
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap gap-1">
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap gap-1.5">
                       {analysis.tech_stack.map((tech) => (
-                        <Badge key={tech} className="bg-blue-500/30 text-blue-200 border-blue-500/50 text-xs">
+                        <span key={tech} className="normandy-badge normandy-badge-orange text-[10px]">
                           {tech}
-                        </Badge>
+                        </span>
                       ))}
                       {analysis.frameworks.map((fw) => (
-                        <Badge key={fw} variant="outline" className="border-blue-500/30 text-blue-300 text-xs">
+                        <span key={fw} className="normandy-badge normandy-badge-cyan text-[10px]">
                           {fw}
-                        </Badge>
+                        </span>
                       ))}
                     </div>
-                    <p className="text-sm text-blue-200/70">
-                      {analysis.file_count} files | Phase: {analysis.sop_progress.phase_name}
+                    <p className="text-xs text-[var(--normandy-text-secondary)]">
+                      <span className="normandy-mono text-[var(--normandy-cyan)]">{analysis.file_count}</span> files | Phase: {analysis.sop_progress.phase_name}
                     </p>
                     {currentProject.last_analyzed && (
-                      <p className="text-xs text-blue-300/50">
-                        Last analyzed:{" "}
-                        {new Date(currentProject.last_analyzed).toLocaleDateString()}
+                      <p className="text-[10px] text-[var(--normandy-text-muted)]">
+                        Last scan: {new Date(currentProject.last_analyzed).toLocaleDateString()}
                       </p>
                     )}
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2 text-sm text-blue-200/70">
-                    <Sparkles className="h-4 w-4 text-blue-400" />
+                  <div className="flex items-center gap-2 text-sm text-[var(--normandy-text-muted)]">
+                    <Shield className="h-4 w-4" />
                     {currentProject.local_path
-                      ? "Click Analyze to scan project"
-                      : "Add a local path to enable analysis"}
+                      ? "Run analysis to gather intel"
+                      : "Add local path to enable scanning"}
                   </div>
                 )}
-              </GlassAccentCard>
+              </div>
             </div>
+
+            {/* AI Guidance */}
+            <AIGuidance
+              currentPhase={currentProject.current_phase}
+              projectName={currentProject.name}
+              onStartChat={() => setActiveTab("chat")}
+            />
 
             {/* Recommendations */}
             {analysis && analysis.recommendations.length > 0 && (
-              <GlassCard intensity="subtle" className="mb-6">
+              <div className="normandy-panel p-5 mb-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/25">
-                    <Sparkles className="h-4 w-4 text-white" />
-                  </div>
-                  <h3 className="font-semibold text-foreground">Recommendations</h3>
+                  <Sparkles className="h-4 w-4 text-[var(--normandy-warning)]" />
+                  <span className="normandy-label text-[var(--normandy-warning)]">Tactical Recommendations</span>
                 </div>
                 <ul className="space-y-2">
                   {analysis.recommendations.map((rec, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                      <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                    <li key={i} className="flex items-start gap-2 text-sm text-[var(--normandy-text-primary)]">
+                      <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-[var(--normandy-orange)]" />
                       {rec}
                     </li>
                   ))}
                 </ul>
-              </GlassCard>
+              </div>
             )}
 
-            {/* Roadmap */}
-            <GlassCard intensity="subtle">
+            {/* SOP Roadmap */}
+            <div className="normandy-panel p-5">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-foreground">SOP Roadmap</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Track your progress through the 13 SOPs from idea to revenue
+                <h3 className="normandy-heading text-lg">Mission Objectives</h3>
+                <p className="text-xs text-[var(--normandy-text-muted)] mt-1 uppercase tracking-wider">
+                  13 SOPs from ideation to revenue
                 </p>
               </div>
+              <div className="normandy-divider mb-4" />
               {roadmapLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <Loader2 className="h-6 w-6 animate-spin text-[var(--normandy-cyan)]" />
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -343,62 +352,67 @@ export default function ProjectPage() {
                       key={item.id}
                       onClick={() => handleRoadmapItemClick(item)}
                       className={cn(
-                        "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all",
+                        "flex w-full items-center gap-3 rounded p-3 text-left transition-all border",
                         item.status === "complete"
-                          ? "border-green-500/30 bg-green-500/10 hover:bg-green-500/15"
+                          ? "border-[var(--normandy-success)] border-opacity-30 bg-[rgba(0,255,136,0.08)] hover:bg-[rgba(0,255,136,0.12)]"
                           : item.status === "in_progress"
-                          ? "border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/15"
-                          : "border-black/10 dark:border-white/10 hover:bg-black/5 dark:hover:bg-white/5"
+                          ? "border-[var(--normandy-cyan)] border-opacity-30 bg-[var(--normandy-cyan-subtle)] hover:bg-[rgba(0,212,255,0.15)]"
+                          : "border-[var(--normandy-border)] hover:border-[var(--normandy-cyan)] hover:border-opacity-30 hover:bg-[var(--normandy-cyan-subtle)]"
                       )}
                     >
+                      {/* Status Icon */}
                       <div
                         className={cn(
-                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg shadow-lg",
+                          "flex h-7 w-7 shrink-0 items-center justify-center rounded",
                           item.status === "complete"
-                            ? "bg-green-500 text-white shadow-green-500/25"
+                            ? "bg-[var(--normandy-success)] bg-opacity-20 border border-[var(--normandy-success)] border-opacity-50"
                             : item.status === "in_progress"
-                            ? "bg-blue-500 text-white shadow-blue-500/25"
-                            : "border border-black/20 dark:border-white/20 bg-black/5 dark:bg-white/5"
+                            ? "bg-[var(--normandy-cyan)] bg-opacity-20 border border-[var(--normandy-cyan)] border-opacity-50"
+                            : "border border-[var(--normandy-border)] bg-[var(--normandy-surface)]"
                         )}
                       >
                         {item.status === "complete" ? (
-                          <Check className="h-4 w-4" />
+                          <Check className="h-4 w-4 text-[var(--normandy-success)]" />
                         ) : item.status === "in_progress" ? (
-                          <Play className="h-3 w-3" />
+                          <Play className="h-3 w-3 text-[var(--normandy-cyan)]" />
                         ) : (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] normandy-mono text-[var(--normandy-text-muted)]">
                             {item.sop_number.toString().padStart(2, "0")}
                           </span>
                         )}
                       </div>
+                      {/* Content */}
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] normandy-mono text-[var(--normandy-text-muted)]">
                             SOP-{item.sop_number.toString().padStart(2, "0")}
                           </span>
-                          <span className="font-medium text-foreground">{item.sop_name}</span>
+                          <span className="text-sm font-medium text-[var(--normandy-text-primary)]">
+                            {item.sop_name}
+                          </span>
                         </div>
                         {item.ai_notes && (
-                          <p className="mt-1 text-xs text-muted-foreground">
+                          <p className="mt-1 text-xs text-[var(--normandy-text-muted)]">
                             {item.ai_notes}
                           </p>
                         )}
                       </div>
-                      <Badge
+                      {/* Status Badge */}
+                      <span
                         className={cn(
-                          "capitalize",
-                          item.status === "complete" && "bg-green-500/20 text-green-700 dark:text-green-300 border-green-500/30",
-                          item.status === "in_progress" && "bg-blue-500/20 text-blue-700 dark:text-blue-300 border-blue-500/30",
-                          item.status === "pending" && "bg-black/10 dark:bg-white/10 text-muted-foreground border-black/10 dark:border-white/10"
+                          "normandy-badge text-[10px]",
+                          item.status === "complete" && "normandy-badge-success",
+                          item.status === "in_progress" && "normandy-badge-cyan",
+                          item.status === "pending" && "bg-[var(--normandy-surface)] border-[var(--normandy-border)] text-[var(--normandy-text-muted)]"
                         )}
                       >
-                        {item.status === "in_progress" ? "In Progress" : item.status}
-                      </Badge>
+                        {item.status === "in_progress" ? "Active" : item.status}
+                      </span>
                     </button>
                   ))}
                 </div>
               )}
-            </GlassCard>
+            </div>
           </div>
         </TabsContent>
 
