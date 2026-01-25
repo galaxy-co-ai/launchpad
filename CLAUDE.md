@@ -46,14 +46,17 @@ Dalton and Claude are **equal partners**. This means:
 ```
 launchpad/
 ├── .launchpad/           # Internal config
+├── _assets/              # Static assets (logos, images)
 ├── _design-system/       # LOCKED design tokens (light/dark, Lucide icons)
 ├── _stack/               # LOCKED tech decisions
-├── _sops/                # Standard Operating Procedures (00-12)
+├── _sops/                # Standard Operating Procedures (00-12 + 01a)
 ├── _templates/           # Project boilerplates, docs, env files
-├── _vault/               # Ideas vault (active/backlog/shipped/killed)
+├── _vault/               # Ideas vault (active/backlog/shipped/killed/audits)
 ├── _agents/              # n8n workflows, prompts, MCP configs
 ├── _scripts/             # PowerShell automation
 ├── _integrations/        # Pre-configured service configs
+├── _archive/             # Historical records (15-day retention)
+├── _scratch/             # Temporary notes (7-day retention)
 └── projects/             # Active project builds
 ```
 
@@ -61,46 +64,51 @@ launchpad/
 
 **Ideation Phase (SOPs 00-03)**
 1. **Idea Intake** → `00-idea-intake.md` captures ideas to vault
-2. **Validation** → `01-quick-validation.md` scores problem/market/money
-3. **Scope Lock** → `02-mvp-scope-contract.md` prevents scope creep
-4. **Revenue Lock** → `03-revenue-model-lock.md` defines monetization
+2. **Quick Validation** → `01-quick-validation.md` fast check (125 pts)
+3. **Rigorous Audit** → `01a-rigorous-idea-audit.md` deep PMF validation (500 pts, 70% kill rate)
+4. **Scope Lock** → `02-mvp-scope-contract.md` prevents scope creep
+5. **Revenue Lock** → `03-revenue-model-lock.md` defines monetization
 
 **Design Phase (SOP 04)**
-5. **Design Brief** → `04-design-brief.md` plans UI before code
+6. **Design Brief** → `04-design-brief.md` plans UI before code
 
 **Setup Phase (SOPs 05-06)**
-6. **Project Setup** → `05-project-setup.md` scaffolds from templates
-7. **Infrastructure** → `06-infrastructure-provisioning.md` connects services
+7. **Project Setup** → `05-project-setup.md` scaffolds from templates
+8. **Infrastructure** → `06-infrastructure-provisioning.md` connects services
 
 **Build Phase (SOPs 07-08)**
-8. **Development** → `07-development-protocol.md` builds features
-9. **QA Testing** → `08-testing-qa-checklist.md` ensures quality
+9. **Development** → `07-development-protocol.md` builds features
+10. **QA Testing** → `08-testing-qa-checklist.md` ensures quality
 
 **Launch Phase (SOPs 09-10)**
-10. **Pre-Ship** → `09-pre-ship-checklist.md` final checks
-11. **Launch Day** → `10-launch-day-protocol.md` deploy + verify
+11. **Pre-Ship** → `09-pre-ship-checklist.md` final checks
+12. **Launch Day** → `10-launch-day-protocol.md` deploy + verify
 
 **Post-Launch Phase (SOPs 11-12)**
-12. **Monitoring** → `11-post-launch-monitoring.md` watch + iterate
-13. **Marketing** → `12-marketing-activation.md` acquire customers
+13. **Monitoring** → `11-post-launch-monitoring.md` watch + iterate
+14. **Marketing** → `12-marketing-activation.md` acquire customers
 
 ## Linked Docs
 
 | Doc | Purpose |
 |-----|---------|
+| `DIRECTORY.md` | Navigation guide for AI/devs |
 | `MANIFEST.md` | System status tracker |
 | `_stack/STACK.md` | Locked tech decisions |
 | `_design-system/DESIGN_SYSTEM.md` | Design token reference |
-| `_vault/IDEAS.md` | 140 pre-validated ideas |
+| `_vault/IDEAS.md` | Ideas index |
 | `AGENTS.md` | AI agent routing |
 
 ## Commands
 
 ```powershell
-# Project management (Phase 2)
-.\new-project.ps1 -name "project-name" -template "nextjs-web"
-.\setup-env.ps1 -project "project-name"
-.\provision-db.ps1 -project "project-name"
+# Project scaffolding
+.\_scripts\new-project.ps1 -Name "project-name" -Template "nextjs-web"
+.\_scripts\setup-env.ps1 -Project "project-name"
+.\_scripts\provision-db.ps1 -Project "project-name"
+
+# Idea validation
+.\_scripts\audit-idea.ps1 -Slug "idea-slug"
 ```
 
 ## Preferences

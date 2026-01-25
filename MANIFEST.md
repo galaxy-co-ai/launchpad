@@ -2,8 +2,8 @@
 
 > System status tracker — what's built, what's pending.
 
-**Last Updated:** 2025-12-28
-**Version:** 0.7.0 (SOPs Complete)
+**Last Updated:** 2026-01-24
+**Version:** 1.7.0 (AI-Powered SOP Assistant)
 
 ---
 
@@ -13,6 +13,7 @@
 | File | Status | Notes |
 |------|--------|-------|
 | `CLAUDE.md` | ✅ Complete | AI cofounder context |
+| `DIRECTORY.md` | ✅ Complete | Navigation guide for AI/devs |
 | `CURSORRULES.md` | ✅ Complete | Cursor IDE rules |
 | `AGENTS.md` | ✅ Complete | Agent routing constitution |
 | `README.md` | ✅ Complete | Project overview |
@@ -33,6 +34,8 @@
 | File | Status | Notes |
 |------|--------|-------|
 | `STACK.md` | ✅ Complete | Locked tech decisions |
+| `TECH_BASELINE.md` | ✅ Complete | Canonical version baseline |
+| `SECURITY_BASELINE.md` | ✅ Complete | Credential + CI security rules |
 | `dependencies.md` | ✅ Complete | Approved packages |
 | `patterns.md` | ✅ Complete | Code patterns |
 | `anti-patterns.md` | ✅ Complete | What NOT to do |
@@ -55,6 +58,7 @@
 |------|--------|-------|-------|
 | `00-idea-intake.md` | ✅ Complete | Ideation | Capture and catalog ideas into vault |
 | `01-quick-validation.md` | ✅ Complete | Ideation | Validate problem, market, monetization |
+| `01a-rigorous-idea-audit.md` | ✅ Complete | Ideation | Deep PMF validation (70% kill rate) |
 | `02-mvp-scope-contract.md` | ✅ Complete | Ideation | Lock features, timeline, success metrics |
 | `03-revenue-model-lock.md` | ✅ Complete | Ideation | Define how product makes first dollar |
 | `04-design-brief.md` | ✅ Complete | Design | Plan user flows and UI |
@@ -70,7 +74,8 @@
 ### Ideas Vault (`_vault/`)
 | File | Status | Notes |
 |------|--------|-------|
-| `IDEAS.md` | ⏳ Pending | 140 pre-validated ideas |
+| `IDEAS.md` | ✅ Complete | Master index for idea tracking |
+| `audits/` | ✅ Complete | Rigorous audit reports (AUDIT-[slug].md) |
 
 ### Templates (`_templates/`)
 | File | Status | Notes |
@@ -79,7 +84,11 @@
 | `env/.env.local.template` | ✅ Complete | Developer setup template |
 | `docs/PRD.md` | ✅ Complete | Product requirements template |
 | `docs/PITCH.md` | ✅ Complete | One-pager pitch template |
-| `project/nextjs-web/` | 🔨 Scaffolded | Structure ready, implementation tomorrow |
+| `docs/AUDIT-TEMPLATE.md` | ✅ Complete | Rigorous audit report template |
+| `project/nextjs-web/` | ✅ Complete | Full-stack web app boilerplate |
+| `project/nextjs-web/lib/db/seed.ts` | ✅ Complete | Test users & subscriptions seed |
+| `project/api-only/` | ✅ Complete | API-only backend (Edge, Clerk, Upstash) |
+| `project/api-only/src/lib/db/seed.ts` | ✅ Complete | Items, API keys, usage events seed |
 
 ### Integrations (`_integrations/`)
 | File | Status | Notes |
@@ -91,26 +100,77 @@
 |------|--------|-------|
 | `directory-qco.ps1` | ✅ Complete | Quality control cleanup script |
 | `setup-hooks.ps1` | ✅ Complete | Configure git to use .githooks/ |
-| `new-project.ps1` | ⏳ Pending | |
-| `setup-env.ps1` | ⏳ Pending | |
-| `provision-db.ps1` | ⏳ Pending | |
+| `new-project.ps1` | ✅ Complete | Create project + optional AI PRD generation |
+| `setup-env.ps1` | ✅ Complete | Interactive environment setup |
+| `provision-db.ps1` | ✅ Complete | Neon/Drizzle database provisioning |
+| `audit-idea.ps1` | ✅ Complete | PMF audit with AI-assisted scoring |
+| `modules/Invoke-ClaudeApi.psm1` | ✅ Complete | Claude API PowerShell module |
+
+### AI Prompts (`_agents/prompts/`)
+| File | Status | Notes |
+|------|--------|-------|
+| `audit-scoring.md` | ✅ Complete | PMF scoring analysis prompt |
+| `prd-generation.md` | ✅ Complete | PRD generation prompt |
+| `sop-assistant.md` | ✅ Complete | SOP navigation assistant prompt |
+
+### MCP Server (`_agents/mcp/launchpad-server/`)
+| File | Status | Notes |
+|------|--------|-------|
+| `package.json` | ✅ Complete | Dependencies and scripts |
+| `tsconfig.json` | ✅ Complete | TypeScript config |
+| `src/index.ts` | ✅ Complete | Server entry point |
+| `src/tools/sops.ts` | ✅ Complete | SOP tools (get, list, search) |
+| `src/tools/ideas.ts` | ✅ Complete | Idea tools (CRUD) |
+| `src/tools/audits.ts` | ✅ Complete | Audit tools |
+| `src/tools/projects.ts` | ✅ Complete | Project tools |
+| `src/tools/vault.ts` | ✅ Complete | Vault stats |
+| `src/tools/sop-assistant.ts` | ✅ Complete | AI SOP Assistant (ask, suggest) |
+| `src/resources/index.ts` | ✅ Complete | Resource handlers |
+| `src/utils/paths.ts` | ✅ Complete | Path utilities |
+| `src/utils/markdown.ts` | ✅ Complete | Markdown parsing |
+| `README.md` | ✅ Complete | Setup instructions |
+
+### n8n Workflows (`_agents/n8n/workflows/`)
+| File | Status | Notes |
+|------|--------|-------|
+| `README.md` | ✅ Complete | Setup guide, import instructions |
+| `health-monitor.json` | ✅ Complete | Daily health dashboard (Sentry, Stripe, Vercel, Neon) |
+| `idea-intake-notify.json` | ✅ Complete | Audit result notifications (proceed/pivot/kill) |
+| `deploy-alert.json` | ✅ Complete | Vercel deployment notifications |
+
+### Assets (`_assets/`)
+| File | Status | Notes |
+|------|--------|-------|
+| `launchpad_rocket_logo.png` | ✅ Complete | Launchpad logo |
+
+### CI/CD (`.github/workflows/`)
+| File | Status | Notes |
+|------|--------|-------|
+| `ci.yml` | ✅ Complete | Lint + type-check + build on PRs |
+| `nextjs-web/.github/workflows/ci.yml` | ✅ Complete | CI template for web projects |
+| `api-only/.github/workflows/ci.yml` | ✅ Complete | CI template for API projects |
 
 ---
 
 ## Progress Summary
 
 ```
-Priority 1: Core Files        [7/7]  ██████████ 100% ✅
-Priority 2: Governance        [5/5]  ██████████ 100% ✅
-Priority 3: Stack             [4/4]  ██████████ 100% ✅
-Priority 4: Design System     [9/9]  ██████████ 100% ✅
-Priority 5: SOPs              [13/13] ██████████ 100% ✅
-Priority 6: Ideas Vault       [0/1]  ░░░░░░░░░░ 0%
-Priority 7: Templates         [4/5]  ████████░░ 80%
-Priority 8: Integrations      [1/1]  ██████████ 100% ✅
-Priority 9: Scripts           [2/5]  ████░░░░░░ 40%
+Priority 1: Core Files        [8/8]   ██████████ 100% ✅
+Priority 2: Governance        [5/5]   ██████████ 100% ✅
+Priority 3: Stack             [6/6]   ██████████ 100% ✅
+Priority 4: Design System     [9/9]   ██████████ 100% ✅
+Priority 5: SOPs              [14/14] ██████████ 100% ✅
+Priority 6: Ideas Vault       [2/2]   ██████████ 100% ✅
+Priority 7: Templates         [9/9]   ██████████ 100% ✅
+Priority 8: Integrations      [1/1]   ██████████ 100% ✅
+Priority 9: Scripts           [7/7]   ██████████ 100% ✅
+Priority 10: Assets           [1/1]   ██████████ 100% ✅
+Priority 11: n8n Workflows    [4/4]   ██████████ 100% ✅
+Priority 12: CI/CD            [3/3]   ██████████ 100% ✅
+Priority 13: AI Prompts       [3/3]   ██████████ 100% ✅
+Priority 14: MCP Server       [13/13] ██████████ 100% ✅
 
-Overall: 45/50 files (90%)
+Overall: 85/85 files (100%) ✅
 ```
 
 ---
@@ -119,6 +179,31 @@ Overall: 45/50 files (90%)
 
 | Date | Change |
 |------|--------|
+| 2026-01-24 | Added TECH_BASELINE.md and SECURITY_BASELINE.md to lock canonical versions and security rules |
+| 2026-01-24 | Created sprint plan for baseline alignment + security hardening |
+| 2026-01-24 | Aligned launchpad-app package versions to the locked stack baseline |
+| 2026-01-24 | Added CI secret scanning via gitleaks action |
+| 2026-01-24 | Removed unused code warnings in launchpad-app and restored clean lint output |
+| 2026-01-24 | Updated git remote to SSH to eliminate embedded token risk |
+| 2025-01-05 | Added AI SOP Assistant: ask_sop_assistant, suggest_next_sop tools |
+| 2025-01-05 | Added sop-assistant.md prompt template for AI navigation help |
+| 2025-01-05 | Added MCP server: 12 tools for ideas, SOPs, audits, projects, vault |
+| 2025-01-05 | Added Claude AI integration: Invoke-ClaudeApi.psm1 module |
+| 2025-01-05 | Enhanced audit-idea.ps1 with AI-assisted scoring suggestions |
+| 2025-01-05 | Enhanced new-project.ps1 with optional AI PRD generation |
+| 2025-01-05 | Added prompt templates: audit-scoring.md, prd-generation.md |
+| 2025-01-05 | Added database seed scripts (pnpm db:seed) to both templates |
+| 2025-01-05 | Completed nextjs-web DB layer: schema.ts, index.ts, seed.ts |
+| 2025-01-05 | Added GitHub Actions CI/CD: lint, type-check, build on PRs (Vercel handles deploy) |
+| 2025-01-05 | Added n8n workflow templates: health-monitor, idea-intake-notify, deploy-alert |
+| 2025-01-05 | Directory hygiene: Added DIRECTORY.md, moved logo to _assets/, added .gitkeep files |
+| 2025-01-05 | Added api-only template (Edge runtime, Clerk, Upstash rate limiting) |
+| 2025-01-05 | Added 01a-rigorous-idea-audit.md — 5-pillar PMF validation (70% kill rate) |
+| 2025-01-05 | Added AUDIT-TEMPLATE.md and audit-idea.ps1 interactive script |
+| 2025-01-05 | Created _vault/audits/ for rigorous audit reports |
+| 2025-01-05 | Fixed all gaps: IDEAS.md, new-project.ps1, setup-env.ps1, provision-db.ps1 |
+| 2025-01-05 | Cleaned up nextjs-web template (removed committed node_modules) |
+| 2025-01-05 | Achieved 100% completion — all 50 files complete |
 | 2025-12-28 | Rebuilt SOP system: 13 SOPs (00-12) with Universal SOP Framework |
 | 2025-12-28 | Scaffolded nextjs-web boilerplate (20+ files, ready for implementation) |
 | 2025-12-28 | Added PRD.md and PITCH.md doc templates |
@@ -133,12 +218,6 @@ Overall: 45/50 files (90%)
 | 2025-12-28 | Created `_scratch/` folder for temporary notes |
 | 2025-12-28 | Added `directory-qco.ps1` cleanup script |
 | 2025-12-27 | Initial manifest created |
-
----
-
-## Pending Decisions
-
-- [ ] **Design system restructure:** Implement foundation/expansions architecture for modular theme packs
 
 ---
 
