@@ -26,7 +26,9 @@ impl Database {
     }
 
     pub fn init(&self) -> Result<()> {
-        let conn = self.conn.lock()
+        let conn = self
+            .conn
+            .lock()
             .map_err(|_| rusqlite::Error::InvalidQuery)?;
 
         // Enable foreign keys
@@ -181,6 +183,12 @@ impl Database {
         conn.execute(
             "CREATE INDEX IF NOT EXISTS idx_ideas_status
              ON ideas(status)",
+            [],
+        )?;
+
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_shot_clock_project_phase
+             ON shot_clock_sessions(project_id, phase_number)",
             [],
         )?;
 

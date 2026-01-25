@@ -56,11 +56,16 @@
 
 **Idea Template:**
 ```markdown
-# IDEA: [Name]
+---
+name: "[Idea Name]"
+slug: "[kebab-case-slug]"
+status: "backlog"
+source: "[Where this came from]"
+created_at: "[YYYY-MM-DDTHH:MM:SSZ]"
+updated_at: "[YYYY-MM-DDTHH:MM:SSZ]"
+---
 
-**Captured:** [Date]
-**Source:** [Where this came from]
-**Status:** Backlog
+# [Idea Name]
 
 ## Problem Statement
 [Who has this problem? What pain does it cause? How do they currently solve it?]
@@ -76,6 +81,8 @@
 ## Raw Notes
 [Dump any additional context, links, screenshots, quotes here]
 ```
+
+> **Note:** YAML frontmatter enables automated parsing while keeping the body human-readable.
 
 **Output:** Idea file created in `_vault/backlog/`
 
@@ -141,4 +148,4 @@ Blockers: None
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2025-01-05*

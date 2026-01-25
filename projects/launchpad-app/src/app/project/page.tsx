@@ -7,6 +7,7 @@ import type { RoadmapItem, ProjectAnalysis } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatContainer } from "@/components/chat/chat-container";
 import { AIGuidance } from "@/components/ai-guidance";
+import ErrorBoundary from "@/components/error-boundary";
 import { open } from "@tauri-apps/plugin-shell";
 import {
   ArrowLeft,
@@ -417,10 +418,12 @@ export default function ProjectPage() {
         </TabsContent>
 
         <TabsContent value="chat" className="flex-1 overflow-hidden mt-0">
-          <ChatContainer
-            projectId={currentProject.id}
-            projectName={currentProject.name}
-          />
+          <ErrorBoundary boundaryName="Project Chat">
+            <ChatContainer
+              projectId={currentProject.id}
+              projectName={currentProject.name}
+            />
+          </ErrorBoundary>
         </TabsContent>
       </Tabs>
     </div>

@@ -1,0 +1,204 @@
+{
+  "name": "Daily Health Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger-cron",
+      "name": "Daily 9am Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://sentry.io/api/0/projects/={{ $env.SENTRY_ORG }}/={{ $env.SENTRY_PROJECT }}/issues/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "qs": {
+            "statsPeriod": "24h",
+            "query": "is:unresolved"
+          }
+        }
+      },
+      "id": "sentry-errors",
+      "name": "Fetch Sentry Errors",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [480, 140],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "sentry-auth",
+          "name": "Sentry Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.stripe.com/v1/charges",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "qs": {
+            "created[gte]": "={{ Math.floor((Date.now() - 86400000) / 1000) }}",
+            "limit": 100
+          }
+        }
+      },
+      "id": "stripe-revenue",
+      "name": "Fetch Stripe Revenue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [480, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "stripe-auth",
+          "name": "Stripe Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://api.vercel.com/v6/deployments",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "qs": {
+            "projectId": "={{ $env.VERCEL_PROJECT_ID }}",
+            "limit": 1
+          }
+        }
+      },
+      "id": "vercel-status",
+      "name": "Fetch Vercel Deployment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [480, 460],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "vercel-auth",
+          "name": "Vercel Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT 1 as health_check, NOW() as checked_at, (SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public') as table_count"
+      },
+      "id": "neon-health",
+      "name": "Check Neon Database",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [480, 620],
+      "credentials": {
+        "postgres": {
+          "id": "neon-db",
+          "name": "Neon Database"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "multiplex",
+        "options": {}
+      },
+      "id": "merge-data",
+      "name": "Merge All Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate all health data\nconst items = $input.all();\n\n// Extract data from each source\nlet sentryErrors = 0;\nlet topIssues = [];\nlet dailyRevenue = 0;\nlet chargeCount = 0;\nlet deployStatus = 'unknown';\nlet deployUrl = '';\nlet dbHealth = 'unknown';\nlet tableCount = 0;\n\nfor (const item of items) {\n  const data = item.json;\n  \n  // Sentry data\n  if (Array.isArray(data) && data[0]?.title) {\n    sentryErrors = data.length;\n    topIssues = data.slice(0, 3).map(i => i.title);\n  }\n  \n  // Stripe data\n  if (data.data && data.data[0]?.amount) {\n    chargeCount = data.data.length;\n    dailyRevenue = data.data.reduce((sum, c) => sum + (c.amount / 100), 0);\n  }\n  \n  // Vercel data\n  if (data.deployments && data.deployments[0]) {\n    const deploy = data.deployments[0];\n    deployStatus = deploy.state || deploy.readyState;\n    deployUrl = deploy.url ? `https://${deploy.url}` : '';\n  }\n  \n  // Neon data\n  if (data[0]?.health_check === 1) {\n    dbHealth = 'connected';\n    tableCount = data[0].table_count;\n  }\n}\n\n// Format the report\nconst date = new Date().toISOString().split('T')[0];\nconst statusEmoji = sentryErrors > 10 ? ':red_circle:' : sentryErrors > 0 ? ':yellow_circle:' : ':white_check_mark:';\nconst deployEmoji = deployStatus === 'READY' ? ':white_check_mark:' : ':warning:';\nconst dbEmoji = dbHealth === 'connected' ? ':white_check_mark:' : ':x:';\n\nconst report = {\n  text: `*Daily Health Report - ${date}*`,\n  blocks: [\n    {\n      type: 'header',\n      text: {\n        type: 'plain_text',\n        text: `Daily Health Report - ${date}`\n      }\n    },\n    {\n      type: 'section',\n      text: {\n        type: 'mrkdwn',\n        text: `${statusEmoji} *Errors:* ${sentryErrors} unresolved issues\\n${topIssues.length > 0 ? '> ' + topIssues.join('\\n> ') : '> No issues'}`\n      }\n    },\n    {\n      type: 'section',\n      text: {\n        type: 'mrkdwn',\n        text: `:moneybag: *Revenue:* $${dailyRevenue.toFixed(2)} (${chargeCount} charges)`\n      }\n    },\n    {\n      type: 'section',\n      text: {\n        type: 'mrkdwn',\n        text: `${deployEmoji} *Deployment:* ${deployStatus}${deployUrl ? '\\n> ' + deployUrl : ''}`\n      }\n    },\n    {\n      type: 'section',\n      text: {\n        type: 'mrkdwn',\n        text: `${dbEmoji} *Database:* ${dbHealth} (${tableCount} tables)`\n      }\n    },\n    {\n      type: 'divider'\n    },\n    {\n      type: 'context',\n      elements: [\n        {\n          type: 'mrkdwn',\n          text: 'Generated by Launchpad Health Monitor'\n        }\n      ]\n    }\n  ]\n};\n\nreturn [{ json: report }];"
+      },
+      "id": "format-report",
+      "name": "Format Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "send-slack",
+      "name": "Send to Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1160, 300]
+    }
+  ],
+  "connections": {
+    "Daily 9am Trigger": {
+      "main": [
+        [
+          { "node": "Fetch Sentry Errors", "type": "main", "index": 0 },
+          { "node": "Fetch Stripe Revenue", "type": "main", "index": 0 },
+          { "node": "Fetch Vercel Deployment", "type": "main", "index": 0 },
+          { "node": "Check Neon Database", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Fetch Sentry Errors": {
+      "main": [
+        [{ "node": "Merge All Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch Stripe Revenue": {
+      "main": [
+        [{ "node": "Merge All Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Fetch Vercel Deployment": {
+      "main": [
+        [{ "node": "Merge All Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Check Neon Database": {
+      "main": [
+        [{ "node": "Merge All Data", "type": "main", "index": 0 }]
+      ]
+    },
+    "Merge All Data": {
+      "main": [
+        [{ "node": "Format Report", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Report": {
+      "main": [
+        [{ "node": "Send to Slack", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "monitoring" },
+    { "name": "launchpad" }
+  ],
+  "pinData": {},
+  "meta": {
+    "instanceId": "launchpad-template"
+  }
+}

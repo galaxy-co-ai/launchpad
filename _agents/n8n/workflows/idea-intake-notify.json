@@ -1,0 +1,161 @@
+{
+  "name": "Idea Intake Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "idea-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Idea Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "idea-intake-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.score }}",
+              "operation": "largerEqual",
+              "value2": 350
+            }
+          ]
+        }
+      },
+      "id": "check-proceed",
+      "name": "Score >= 350?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.score }}",
+              "operation": "largerEqual",
+              "value2": 250
+            }
+          ]
+        }
+      },
+      "id": "check-pivot",
+      "name": "Score >= 250?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [720, 460]
+    },
+    {
+      "parameters": {
+        "jsCode": "// PROCEED - Score > 350\nconst idea = $input.first().json;\n\nconst message = {\n  text: `New idea ready for build: ${idea.name}`,\n  blocks: [\n    {\n      type: 'header',\n      text: {\n        type: 'plain_text',\n        text: ':white_check_mark: PROCEED - Idea Approved',\n        emoji: true\n      }\n    },\n    {\n      type: 'section',\n      text: {\n        type: 'mrkdwn',\n        text: `*${idea.name}*\\n\\`${idea.slug}\\``\n      }\n    },\n    {\n      type: 'section',\n      fields: [\n        {\n          type: 'mrkdwn',\n          text: `*Score:*\\n${idea.score}/500`\n        },\n        {\n          type: 'mrkdwn',\n          text: `*Outcome:*\\n${idea.outcome.toUpperCase()}`\n        },\n        {\n          type: 'mrkdwn',\n          text: `*Auditor:*\\n${idea.auditor || 'Unknown'}`\n        },\n        {\n          type: 'mrkdwn',\n          text: `*Time:*\\n${new Date(idea.timestamp || Date.now()).toLocaleString()}`\n        }\n      ]\n    },\n    {\n      type: 'section',\n      text: {\n        type: 'mrkdwn',\n        text: `:rocket: *This idea passed the rigorous audit.* Ready to proceed to SOP 02 (Scope Lock).`\n      }\n    },\n    {\n      type: 'actions',\n      elements: [\n        {\n          type: 'button',\n          text: {\n            type: 'plain_text',\n            text: 'View Audit Report'\n          },\n          url: `${process.env.AUDIT_REPORTS_BASE_URL || 'https://github.com/your-org/launchpad/blob/main/_vault/audits'}/AUDIT-${idea.slug}.md`\n        }\n      ]\n    },\n    {\n      type: 'divider'\n    },\n    {\n      type: 'context',\n      elements: [\n        {\n          type: 'mrkdwn',\n          text: 'Launchpad Idea Audit System'\n        }\n      ]\n    }\n  ]\n};\n\nreturn [{ json: { ...message, color: '#22c55e' } }];"
+      },
+      "id": "format-proceed",
+      "name": "Format PROCEED",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 140]
+    },
+    {
+      "parameters": {
+        "jsCode": "// PIVOT - Score 250-350\nconst idea = $input.first().json;\n\nconst message = {\n  text: `Idea needs refinement: ${idea.name}`,\n  blocks: [\n    {\n      type: 'header',\n      text: {\n        type: 'plain_text',\n        text: ':warning: PIVOT REQUIRED - Needs Refinement',\n        emoji: true\n      }\n    },\n    {\n      type: 'section',\n      text: {\n        type: 'mrkdwn',\n        text: `*${idea.name}*\\n\\`${idea.slug}\\``\n      }\n    },\n    {\n      type: 'section',\n      fields: [\n        {\n          type: 'mrkdwn',\n          text: `*Score:*\\n${idea.score}/500`\n        },\n        {\n          type: 'mrkdwn',\n          text: `*Outcome:*\\n${idea.outcome.toUpperCase()}`\n        },\n        {\n          type: 'mrkdwn',\n          text: `*Auditor:*\\n${idea.auditor || 'Unknown'}`\n        },\n        {\n          type: 'mrkdwn',\n          text: `*Time:*\\n${new Date(idea.timestamp || Date.now()).toLocaleString()}`\n        }\n      ]\n    },\n    {\n      type: 'section',\n      text: {\n        type: 'mrkdwn',\n        text: `:pencil2: *This idea shows promise but needs work.* Review the audit report to identify weak pillars and iterate.`\n      }\n    },\n    {\n      type: 'actions',\n      elements: [\n        {\n          type: 'button',\n          text: {\n            type: 'plain_text',\n            text: 'View Audit Report'\n          },\n          url: `${process.env.AUDIT_REPORTS_BASE_URL || 'https://github.com/your-org/launchpad/blob/main/_vault/audits'}/AUDIT-${idea.slug}.md`\n        }\n      ]\n    },\n    {\n      type: 'divider'\n    },\n    {\n      type: 'context',\n      elements: [\n        {\n          type: 'mrkdwn',\n          text: 'Launchpad Idea Audit System'\n        }\n      ]\n    }\n  ]\n};\n\nreturn [{ json: { ...message, color: '#eab308' } }];"
+      },
+      "id": "format-pivot",
+      "name": "Format PIVOT",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 380]
+    },
+    {
+      "parameters": {
+        "jsCode": "// KILL - Score < 250\nconst idea = $input.first().json;\n\nconst message = {\n  text: `Idea killed: ${idea.name}`,\n  blocks: [\n    {\n      type: 'header',\n      text: {\n        type: 'plain_text',\n        text: ':x: KILLED - Idea Rejected',\n        emoji: true\n      }\n    },\n    {\n      type: 'section',\n      text: {\n        type: 'mrkdwn',\n        text: `*${idea.name}*\\n\\`${idea.slug}\\``\n      }\n    },\n    {\n      type: 'section',\n      fields: [\n        {\n          type: 'mrkdwn',\n          text: `*Score:*\\n${idea.score}/500`\n        },\n        {\n          type: 'mrkdwn',\n          text: `*Outcome:*\\n${idea.outcome.toUpperCase()}`\n        },\n        {\n          type: 'mrkdwn',\n          text: `*Auditor:*\\n${idea.auditor || 'Unknown'}`\n        },\n        {\n          type: 'mrkdwn',\n          text: `*Time:*\\n${new Date(idea.timestamp || Date.now()).toLocaleString()}`\n        }\n      ]\n    },\n    {\n      type: 'section',\n      text: {\n        type: 'mrkdwn',\n        text: `:coffin: *This idea did not pass validation.* Moved to \\`_vault/killed/\\`. Consider the learnings for future ideas.`\n      }\n    },\n    {\n      type: 'actions',\n      elements: [\n        {\n          type: 'button',\n          text: {\n            type: 'plain_text',\n            text: 'View Audit Report'\n          },\n          url: `${process.env.AUDIT_REPORTS_BASE_URL || 'https://github.com/your-org/launchpad/blob/main/_vault/audits'}/AUDIT-${idea.slug}.md`\n        }\n      ]\n    },\n    {\n      type: 'divider'\n    },\n    {\n      type: 'context',\n      elements: [\n        {\n          type: 'mrkdwn',\n          text: 'Launchpad Idea Audit System'\n        }\n      ]\n    }\n  ]\n};\n\nreturn [{ json: { ...message, color: '#ef4444' } }];"
+      },
+      "id": "format-kill",
+      "name": "Format KILL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 540]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "send-notification",
+      "name": "Send Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1200, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, outcome: $json.outcome || 'notified', slug: $('Idea Webhook').item.json.slug }) }}"
+      },
+      "id": "respond-webhook",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1440, 300]
+    }
+  ],
+  "connections": {
+    "Idea Webhook": {
+      "main": [
+        [{ "node": "Score >= 350?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Score >= 350?": {
+      "main": [
+        [{ "node": "Format PROCEED", "type": "main", "index": 0 }],
+        [{ "node": "Score >= 250?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Score >= 250?": {
+      "main": [
+        [{ "node": "Format PIVOT", "type": "main", "index": 0 }],
+        [{ "node": "Format KILL", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format PROCEED": {
+      "main": [
+        [{ "node": "Send Notification", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format PIVOT": {
+      "main": [
+        [{ "node": "Send Notification", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format KILL": {
+      "main": [
+        [{ "node": "Send Notification", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send Notification": {
+      "main": [
+        [{ "node": "Respond Success", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "ideas" },
+    { "name": "launchpad" }
+  ],
+  "pinData": {},
+  "meta": {
+    "instanceId": "launchpad-template"
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "name": "Deployment Alert",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deploy",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Vercel Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "deploy-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Vercel deployment webhook payload\nconst payload = $input.first().json;\n\n// Vercel sends different event types\nconst eventType = payload.type || 'deployment';\nconst deployment = payload.payload || payload;\n\n// Extract deployment info\nconst projectName = deployment.name || deployment.project?.name || 'Unknown Project';\nconst state = deployment.state || deployment.readyState || 'unknown';\nconst url = deployment.url ? `https://${deployment.url}` : null;\nconst gitBranch = deployment.meta?.githubCommitRef || deployment.gitSource?.ref || 'main';\nconst gitMessage = deployment.meta?.githubCommitMessage || deployment.gitSource?.message || 'No commit message';\nconst gitAuthor = deployment.meta?.githubCommitAuthorName || deployment.gitSource?.author || 'Unknown';\nconst createdAt = deployment.createdAt || deployment.created || Date.now();\n\n// Determine status and emoji\nlet statusEmoji = ':grey_question:';\nlet statusText = 'Unknown';\nlet color = '#6b7280';\n\nswitch (state.toUpperCase()) {\n  case 'READY':\n    statusEmoji = ':white_check_mark:';\n    statusText = 'Deployed Successfully';\n    color = '#22c55e';\n    break;\n  case 'ERROR':\n  case 'FAILED':\n    statusEmoji = ':x:';\n    statusText = 'Deployment Failed';\n    color = '#ef4444';\n    break;\n  case 'BUILDING':\n  case 'INITIALIZING':\n    statusEmoji = ':hourglass_flowing_sand:';\n    statusText = 'Building...';\n    color = '#3b82f6';\n    break;\n  case 'QUEUED':\n    statusEmoji = ':clock1:';\n    statusText = 'Queued';\n    color = '#6b7280';\n    break;\n  case 'CANCELED':\n  case 'CANCELLED':\n    statusEmoji = ':no_entry_sign:';\n    statusText = 'Cancelled';\n    color = '#f97316';\n    break;\n}\n\nreturn [{\n  json: {\n    projectName,\n    state,\n    statusEmoji,\n    statusText,\n    color,\n    url,\n    gitBranch,\n    gitMessage: gitMessage.substring(0, 100),\n    gitAuthor,\n    createdAt,\n    isSuccess: state.toUpperCase() === 'READY',\n    isFailed: ['ERROR', 'FAILED'].includes(state.toUpperCase())\n  }\n}];"
+      },
+      "id": "parse-payload",
+      "name": "Parse Vercel Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.state }}",
+              "operation": "equals",
+              "value2": "BUILDING"
+            }
+          ]
+        }
+      },
+      "id": "filter-building",
+      "name": "Skip Building?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nconst blocks = [\n  {\n    type: 'header',\n    text: {\n      type: 'plain_text',\n      text: `${data.statusEmoji} ${data.statusText}`,\n      emoji: true\n    }\n  },\n  {\n    type: 'section',\n    text: {\n      type: 'mrkdwn',\n      text: `*Project:* ${data.projectName}`\n    }\n  },\n  {\n    type: 'section',\n    fields: [\n      {\n        type: 'mrkdwn',\n        text: `*Branch:*\\n\\`${data.gitBranch}\\``\n      },\n      {\n        type: 'mrkdwn',\n        text: `*Author:*\\n${data.gitAuthor}`\n      }\n    ]\n  },\n  {\n    type: 'section',\n    text: {\n      type: 'mrkdwn',\n      text: `*Commit:*\\n> ${data.gitMessage}`\n    }\n  }\n];\n\n// Add URL button if deployment succeeded\nif (data.isSuccess && data.url) {\n  blocks.push({\n    type: 'actions',\n    elements: [\n      {\n        type: 'button',\n        text: {\n          type: 'plain_text',\n          text: 'View Deployment'\n        },\n        url: data.url,\n        style: 'primary'\n      }\n    ]\n  });\n}\n\n// Add error info if failed\nif (data.isFailed) {\n  blocks.push({\n    type: 'section',\n    text: {\n      type: 'mrkdwn',\n      text: ':warning: *Check Vercel dashboard for error details*'\n    }\n  });\n}\n\nblocks.push(\n  { type: 'divider' },\n  {\n    type: 'context',\n    elements: [\n      {\n        type: 'mrkdwn',\n        text: `Launchpad Deploy Monitor | ${new Date(data.createdAt).toLocaleString()}`\n      }\n    ]\n  }\n);\n\nreturn [{\n  json: {\n    text: `${data.statusEmoji} ${data.projectName}: ${data.statusText}`,\n    blocks\n  }\n}];"
+      },
+      "id": "format-message",
+      "name": "Format Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 460]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}"
+      },
+      "id": "send-slack",
+      "name": "Send to Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1200, 460]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, project: $('Parse Vercel Payload').item.json.projectName, state: $('Parse Vercel Payload').item.json.state }) }}"
+      },
+      "id": "respond-webhook",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1440, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, skipped: true, reason: 'building' }) }}"
+      },
+      "id": "respond-skip",
+      "name": "Respond Skipped",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [960, 140]
+    }
+  ],
+  "connections": {
+    "Vercel Webhook": {
+      "main": [
+        [{ "node": "Parse Vercel Payload", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parse Vercel Payload": {
+      "main": [
+        [{ "node": "Skip Building?", "type": "main", "index": 0 }]
+      ]
+    },
+    "Skip Building?": {
+      "main": [
+        [{ "node": "Respond Skipped", "type": "main", "index": 0 }],
+        [{ "node": "Format Message", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Message": {
+      "main": [
+        [{ "node": "Send to Slack", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send to Slack": {
+      "main": [
+        [{ "node": "Respond Success", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    { "name": "deploy" },
+    { "name": "launchpad" }
+  ],
+  "pinData": {},
+  "meta": {
+    "instanceId": "launchpad-template"
+  }
+}

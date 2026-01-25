@@ -6,6 +6,7 @@ import { useAppStore } from "@/lib/store";
 import { Sidebar } from "@/components/sidebar";
 import { TitleBar } from "@/components/titlebar";
 import { ErrorToast } from "@/components/error-toast";
+import ErrorBoundary from "@/components/error-boundary";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -96,7 +97,9 @@ export function AppShell({ children }: AppShellProps) {
     return (
       <div className="flex h-screen flex-col bg-background">
         <TitleBar />
-        <main className="flex-1 overflow-hidden">{children}</main>
+        <ErrorBoundary boundaryName="Onboarding">
+          <main className="flex-1 overflow-hidden">{children}</main>
+        </ErrorBoundary>
         <ErrorToast />
       </div>
     );
@@ -106,8 +109,12 @@ export function AppShell({ children }: AppShellProps) {
     <div className="flex h-screen flex-col bg-background">
       <TitleBar />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 overflow-hidden">{children}</main>
+        <ErrorBoundary boundaryName="Sidebar">
+          <Sidebar />
+        </ErrorBoundary>
+        <ErrorBoundary boundaryName="Main Content">
+          <main className="flex-1 overflow-hidden">{children}</main>
+        </ErrorBoundary>
       </div>
       <ErrorToast />
     </div>
