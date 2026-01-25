@@ -15,6 +15,7 @@ import type {
   IdeaStatus,
   AppError,
   ErrorSeverity,
+  ShotClockSession,
 } from "./types";
 
 // ============================================
@@ -112,13 +113,26 @@ interface AppState {
   getSOPVersions: (sopNumber: number) => Promise<SOP[]>;
   initDefaultSOPs: () => Promise<void>;
 
-  // Actions - Ideas
+// Actions - Ideas
   fetchIdeas: (status?: IdeaStatus) => Promise<void>;
   getIdea: (id: string) => Promise<Idea | null>;
   createIdea: (input: CreateIdeaInput) => Promise<Idea>;
   updateIdeaStatus: (id: string, status: IdeaStatus) => Promise<void>;
   saveIdeaAudit: (id: string, auditResult: string) => Promise<void>;
   deleteIdea: (id: string) => Promise<void>;
+
+  // Actions - Shot Clock
+  getShotClock: (projectId: string, phaseNumber: number) => Promise<ShotClockSession | null>;
+  listShotClocks: (projectId: string) => Promise<ShotClockSession[]>;
+  startShotClock: (
+    projectId: string,
+    phaseNumber: number,
+    allocatedTimeSeconds: number
+  ) => Promise<ShotClockSession>;
+  addBonusTime: (sessionId: string, minutes: number) => Promise<void>;
+  completeShotClock: (sessionId: string) => Promise<void>;
+  lockShotClock: (sessionId: string, duration: number) => Promise<ShotClockSession>;
+  deleteShotClock: (sessionId: string) => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -754,7 +768,7 @@ ${roadmapStatus}
     }
   },
 
-  deleteIdea: async (id: string) => {
+deleteIdea: async (id: string) => {
     try {
       await invoke("delete_idea", { id });
       set((state) => ({
@@ -762,6 +776,86 @@ ${roadmapStatus}
       }));
     } catch (err) {
       get().setError(`Failed to delete idea: ${err}`, "error", "ideas");
+      throw err;
+    }
+  },
+
+  // ==========================================
+  // Shot Clock
+  // ==========================================
+
+  getShotClock: async (projectId: string, phaseNumber: number) => {
+    try {
+      const clock = await invoke<ShotClockSession>("get_shot_clock", { projectId, phaseNumber });
+      return clock;
+    } catch (err) {
+      get().setError(`Failed to get shot clock: ${err}`, "error", "shot_clock");
+      return null;
+    }
+  },
+
+  listShotClocks: async (projectId: string) => {
+    try {
+      const clocks = await invoke<ShotClockSession[]>("list_shot_clocks", { projectId });
+      return clocks;
+    } catch (err) {
+      get().setError(`Failed to list shot clocks: ${err}`, "error", "shot_clock");
+      return [];
+    }
+  },
+
+  startShotClock: async (
+    projectId: string,
+    phaseNumber: number,
+    allocatedTimeSeconds: number
+  ) => {
+    try {
+      const clock = await invoke<ShotClockSession>("start_shot_clock", {
+        projectId,
+        phaseNumber,
+        allocatedTimeSeconds,
+        bonusTimeSeconds: 0,
+      });
+      return clock;
+    } catch (err) {
+      get().setError(`Failed to start shot clock: ${err}`, "error", "shot_clock");
+      throw err;
+    }
+  },
+
+  addBonusTime: async (sessionId: string, minutes: number) => {
+    try {
+      await invoke("add_bonus_time", { id: sessionId, minutes });
+    } catch (err) {
+      get().setError(`Failed to add bonus time: ${err}`, "error", "shot_clock");
+      throw err;
+    }
+  },
+
+  completeShotClock: async (sessionId: string) => {
+    try {
+      await invoke("complete_shot_clock", { id: sessionId });
+    } catch (err) {
+      get().setError(`Failed to complete shot clock: ${err}`, "error", "shot_clock");
+      throw err;
+    }
+  },
+
+  lockShotClock: async (sessionId: string, duration: number) => {
+    try {
+      const clock = await invoke<ShotClockSession>("lock_shot_clock", { id: sessionId, duration });
+      return clock;
+    } catch (err) {
+      get().setError(`Failed to lock shot clock: ${err}`, "error", "shot_clock");
+      throw err;
+    }
+  },
+
+  deleteShotClock: async (sessionId: string) => {
+    try {
+      await invoke("delete_shot_clock", { id: sessionId });
+    } catch (err) {
+      get().setError(`Failed to delete shot clock: ${err}`, "error", "shot_clock");
       throw err;
     }
   },

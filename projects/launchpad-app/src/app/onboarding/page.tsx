@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { getTopIdeas, CATEGORY_NAMES, type ValidatedIdea } from "@/data/validated-ideas";
+import { SHOT_CLOCK_DEFAULTS } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
   Rocket,
@@ -28,12 +29,18 @@ interface ProjectChoice {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { createProject, completeOnboarding } = useAppStore();
+  const createProject = useAppStore((state) => state.createProject);
+  const completeOnboarding = useAppStore((state) => state.completeOnboarding);
+  const startShotClock = useAppStore((state) => state.startShotClock);
+  const setCurrentProject = useAppStore((state) => state.setCurrentProject);
+  const createConversation = useAppStore((state) => state.createConversation);
+  const setCurrentConversation = useAppStore((state) => state.setCurrentConversation);
+
   const [step, setStep] = useState<OnboardingStep>("welcome");
   const [projectChoice, setProjectChoice] = useState<ProjectChoice | null>(null);
   const [customProjectName, setCustomProjectName] = useState("");
   const [creating, setCreating] = useState(false);
-  const [createdProject, setCreatedProject] = useState<{ name: string; slug: string } | null>(null);
+  const [createdProject, setCreatedProject] = useState<{ name: string; slug: string; id: string } | null>(null);
 
   const topIdeas = getTopIdeas(5);
 
@@ -55,9 +62,22 @@ export default function OnboardingPage() {
           ? projectChoice.idea!.name
           : customProjectName.trim() || "My First Project";
 
+      // Create project
       const project = await createProject({ name: projectName });
       await completeOnboarding();
-      setCreatedProject({ name: project.name, slug: project.slug });
+
+      // Start Phase 0 shot clock for first-time users
+      const phase0Time = SHOT_CLOCK_DEFAULTS[0]?.minutes * 60 || 900; // 15 minutes default
+      await startShotClock(project.id, 0, phase0Time);
+
+      // Create conversation for this project
+      const conv = await createConversation(project.id, `${projectName} - Validation`);
+      setCurrentConversation(conv);
+
+      // Set as current project
+      setCurrentProject(project);
+
+      setCreatedProject({ name: project.name, slug: project.slug, id: project.id });
       setStep("project-created");
     } catch (err) {
       console.error("Failed to create project:", err);
@@ -68,6 +88,7 @@ export default function OnboardingPage() {
 
   const handleGoToProject = () => {
     if (createdProject) {
+      // Project already set as current in handleCreateProject
       router.push(`/project?slug=${createdProject.slug}`);
     }
   };
