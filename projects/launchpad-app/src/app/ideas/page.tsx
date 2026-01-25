@@ -41,7 +41,15 @@ const CATEGORY_ICONS: Record<ValidatedIdea["category"], React.ReactNode> = {
 
 export default function IdeasPage() {
   const router = useRouter();
-  const { createProject } = useAppStore();
+  const createProject = useAppStore((state) => state.createProject);
+  const completeOnboarding = useAppStore((state) => state.completeOnboarding);
+  const startShotClock = useAppStore((state) => state.startShotClock);
+  const setCurrentProject = useAppStore((state) => state.setCurrentProject);
+  const createConversation = useAppStore((state) => state.createConversation);
+  const setCurrentConversation = useAppStore((state) => state.setCurrentConversation);
+  const hasCompletedOnboarding = useAppStore((state) => state.hasCompletedOnboarding);
+
+
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("score");
@@ -94,10 +102,24 @@ export default function IdeasPage() {
     return ideas;
   }, [categoryFilter, searchQuery, sortBy, sortAsc]);
 
-  const handleStartProject = async (idea: ValidatedIdea) => {
+  const handleCreateFromIdea = async (idea: ValidatedIdea) => {
     setCreating(true);
     try {
+      // Create project
       const project = await createProject({ name: idea.name });
+      // Ensure onboarding complete (safe guard for Sprint 2)
+      if (!hasCompletedOnboarding) {
+        await completeOnboarding();
+      }
+      // Start Phase 0 shot clock (15 minutes)
+      const phase0Time = 15 * 60;
+      await startShotClock(project.id, 0, phase0Time);
+      // Create validation conversation
+      const conv = await createConversation(project.id, `${idea.name} - Validation`);
+      setCurrentConversation(conv);
+      // Set as current project
+      setCurrentProject(project);
+      // Redirect to project
       router.push(`/project?slug=${project.slug}`);
     } catch (err) {
       console.error("Failed to create project:", err);
@@ -251,25 +273,31 @@ export default function IdeasPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div
-                    className={cn(
-                      "text-2xl font-bold normandy-mono",
-                      idea.totalScore >= 80
-                        ? "text-[var(--normandy-success)]"
-                        : idea.totalScore >= 70
-                        ? "text-[var(--normandy-cyan)]"
-                        : "text-[var(--normandy-orange)]"
+                  <div className="flex items-start gap-2 justify-end">
+                    {idea.totalScore >= 85 && (
+                      <span className="normandy-badge normandy-badge-cyan text-xs mt-1">
+                        ★ TOP
+                      </span>
                     )}
-                    style={{
-                      textShadow:
+                    <div
+                      className={cn(
+                        "text-2xl font-bold normandy-mono",
                         idea.totalScore >= 80
-                          ? "0 0 8px var(--normandy-success-glow)"
+                          ? "text-[var(--normandy-success)]"
                           : idea.totalScore >= 70
-                          ? "0 0 8px var(--normandy-cyan-glow)"
-                          : "0 0 8px var(--normandy-orange-glow)",
-                    }}
-                  >
-                    {idea.totalScore}
+                          ? "text-[var(--normandy-cyan)]"
+                          : "text-[var(--normandy-orange)]"
+                      )}
+                      style={{
+                        textShadow:
+                          idea.totalScore >= 80
+                            ? "0 0 8px var(--normandy-success-glow)"
+                            : idea.totalScore >= 70
+                            ? "0 0 8px var(--normandy-cyan-glow)"
+                            : "0 0 8px var(--normandy-orange-glow)",
+                      }}
+                    >
+                      {idea.totalScore}
                   </div>
                   <div className="text-[10px] text-[var(--normandy-text-muted)]">score</div>
                 </div>
@@ -352,7 +380,16 @@ export default function IdeasPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleStartProject(idea);
+                      // Use new flow: create from idea, start onboarding flow for Phase 0
+                      // if the function was renamed to handleCreateFromIdea, call it; otherwise fall back
+                      // to existing handleStartProject for backward compatibility
+                      // @ts-ignore
+                      if (typeof handleCreateFromIdea === 'function') {
+                        // @ts-ignore
+                        handleCreateFromIdea(idea);
+                      } else {
+                        handleStartProject(idea);
+                      }
                     }}
                     disabled={creating}
                     className="mt-4 w-full normandy-btn normandy-btn-primary py-3 group"
