@@ -2,6 +2,8 @@
 
 > **One-liner:** Build all features with quality and consistency
 
+**Version:** 1.0.0
+
 ---
 
 ## Overview
@@ -172,7 +174,7 @@ const inputSchema = z.object({
 export async function POST(req: Request) {
   try {
     // 1. Check auth
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -344,4 +346,4 @@ Blockers: [None / List any issues]
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2026-01-26*

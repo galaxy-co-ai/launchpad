@@ -2,6 +2,38 @@
 
 > **One-liner:** Deep PMF validation with market research—ideas MUST prove themselves
 
+**Version:** 1.0.0
+
+---
+
+## Which Validation SOP Should I Use?
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  New idea captured in vault                             │
+└─────────────────────────┬───────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│  Do you have high conviction already?                   │
+│  (Personal pain, customer request, obvious gap)         │
+└────────────┬────────────────────────────┬───────────────┘
+             │ YES                        │ NO / UNSURE
+             ▼                            ▼
+┌─────────────────────────┐  ┌────────────────────────────┐
+│  01-quick-validation    │  │  01a-rigorous-idea-audit   │
+│  (Quick filter)         │  │  (This SOP)                │
+│  • 1-4 hours            │  │  • 4-8 hours               │
+│  • 125 points max       │  │  • 500 points max          │
+│  • Good for filtering   │  │  • 70% kill rate target    │
+└─────────────────────────┘  └────────────────────────────┘
+```
+
+**Use this SOP when:**
+- You're unsure if the problem is real
+- You want to de-risk before investing development time
+- An idea scored YELLOW (60-89) on quick validation
+- You're choosing between multiple ideas
+
 ---
 
 ## Overview
@@ -345,4 +377,4 @@ Evidence: AUDIT-[slug].md contains full research
 
 ---
 
-*Last Updated: 2025-01-05*
+*Last Updated: 2026-01-26*

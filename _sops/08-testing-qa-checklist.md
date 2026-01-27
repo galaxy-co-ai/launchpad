@@ -2,6 +2,8 @@
 
 > **One-liner:** Ensure quality across functionality, UX, and performance
 
+**Version:** 1.0.0
+
 ---
 
 ## Overview
@@ -39,6 +41,8 @@
 | Mobile Device/Emulator | Mobile testing | Physical or DevTools |
 | Stripe Test Cards | Payment testing | stripe.com/docs/testing |
 | Test Accounts | Auth testing | Create in Clerk |
+| Vitest | Unit testing | vitest.dev |
+| Playwright | Integration testing | playwright.dev |
 
 ---
 
@@ -186,6 +190,121 @@ Requires Auth: 4000 0025 0000 3155
 
 **Output:** Performance meets targets
 
+### Step 5.5: Automated Testing
+
+Manual testing catches immediate issues, but automated tests prevent regressions and build shipping confidence.
+
+- [ ] Set up Vitest for unit testing
+- [ ] Set up Playwright for integration testing
+- [ ] Write tests for critical paths
+- [ ] Run test suite and verify all pass
+
+**Test File Structure:**
+```
+project/
+├── __tests__/
+│   ├── unit/                    # Vitest unit tests
+│   │   ├── utils.test.ts
+│   │   ├── hooks.test.ts
+│   │   └── components/
+│   │       └── Button.test.tsx
+│   └── integration/             # Playwright E2E tests
+│       ├── auth.spec.ts
+│       ├── checkout.spec.ts
+│       └── core-feature.spec.ts
+├── vitest.config.ts
+└── playwright.config.ts
+```
+
+**Coverage Thresholds:**
+
+| Metric | Target | Notes |
+|--------|--------|-------|
+| Functions | 80% | All utility functions tested |
+| Critical Paths | 100% | Auth, payment, core feature |
+| Components | 60% | Key interactive components |
+
+**Unit Testing with Vitest:**
+```typescript
+// __tests__/unit/utils.test.ts
+import { describe, it, expect } from 'vitest'
+import { formatPrice, validateEmail } from '@/lib/utils'
+
+describe('formatPrice', () => {
+  it('formats cents to dollars', () => {
+    expect(formatPrice(1999)).toBe('$19.99')
+  })
+
+  it('handles zero', () => {
+    expect(formatPrice(0)).toBe('$0.00')
+  })
+})
+
+describe('validateEmail', () => {
+  it('accepts valid email', () => {
+    expect(validateEmail('user@example.com')).toBe(true)
+  })
+
+  it('rejects invalid email', () => {
+    expect(validateEmail('not-an-email')).toBe(false)
+  })
+})
+```
+
+**Integration Testing with Playwright:**
+```typescript
+// __tests__/integration/auth.spec.ts
+import { test, expect } from '@playwright/test'
+
+test.describe('Authentication', () => {
+  test('redirects unauthenticated user to login', async ({ page }) => {
+    await page.goto('/dashboard')
+    await expect(page).toHaveURL(/.*sign-in.*/)
+  })
+
+  test('allows authenticated user to access dashboard', async ({ page }) => {
+    // Use Clerk test helpers or session injection
+    await page.goto('/dashboard')
+    await expect(page.getByRole('heading')).toContainText('Dashboard')
+  })
+})
+
+// __tests__/integration/checkout.spec.ts
+test.describe('Checkout Flow', () => {
+  test('completes purchase with test card', async ({ page }) => {
+    await page.goto('/pricing')
+    await page.click('text=Get Started')
+    // Fill Stripe test card
+    await page.fill('[data-testid="card-number"]', '4242424242424242')
+    await page.click('text=Pay')
+    await expect(page).toHaveURL(/.*success.*/)
+  })
+})
+```
+
+**Critical Path Test Checklist:**
+
+| Path | Test File | Status |
+|------|-----------|--------|
+| Sign up flow | `auth.spec.ts` | [ ] |
+| Sign in flow | `auth.spec.ts` | [ ] |
+| Core feature action | `core-feature.spec.ts` | [ ] |
+| Payment/checkout | `checkout.spec.ts` | [ ] |
+| Error handling | `errors.spec.ts` | [ ] |
+
+**Run Commands:**
+```bash
+# Unit tests
+npm run test              # Run all unit tests
+npm run test:coverage     # With coverage report
+
+# Integration tests
+npm run test:e2e          # Run Playwright tests
+npm run test:e2e:headed   # Run with browser visible
+```
+
+**Output:** All automated tests pass, coverage meets thresholds
+
 ### Step 6: Security Checklist
 - [ ] Auth protects private routes
 - [ ] API routes check authentication
@@ -253,6 +372,7 @@ Requires Auth: 4000 0025 0000 3155
 | Cross-Browser | ✅ Pass | None |
 | Mobile | ⚠️ Issues | [List issues] |
 | Performance | ✅ Pass | Score: [X] |
+| Automated Tests | ✅ Pass | Coverage: [X]% |
 | Security | ✅ Pass | None |
 | Edge Cases | ✅ Pass | None |
 
@@ -277,6 +397,8 @@ Requires Auth: 4000 0025 0000 3155
 |-------------|--------|----------|------------|
 | Test Results | Markdown | Notes or doc | All categories tested |
 | Lighthouse Report | Screenshot | Saved locally | Scores documented |
+| Automated Tests | Test files | `__tests__/` directory | All tests pass |
+| Coverage Report | HTML/Terminal | `coverage/` or stdout | Meets thresholds |
 | Bug List | List | In QA summary | All bugs identified |
 | Fix Verification | Testing | In browser | Critical bugs fixed |
 
@@ -287,7 +409,9 @@ Requires Auth: 4000 0025 0000 3155
 - [ ] **Functional:** All features work correctly
 - [ ] **User Flow:** Full journey is smooth
 - [ ] **Mobile:** Works on mobile devices
-- [ ] **Performance:** Lighthouse score 80+
+- [ ] **Performance:** Lighthouse score 90+
+- [ ] **Tests Pass:** Unit and integration tests green
+- [ ] **Coverage Met:** Functions 80%+, critical paths 100%
 - [ ] **Security:** No auth bypasses possible
 - [ ] **Critical Bugs:** All high-severity issues fixed
 
@@ -304,6 +428,7 @@ Requires Auth: 4000 0025 0000 3155
 | Ignoring performance | "It's fast enough" | Run Lighthouse, get numbers |
 | Self-testing only | Blind to own UX | Get fresh eyes if possible |
 | Fixing while testing | Context switching | Note issues, fix after test pass |
+| Skipping automated tests | "Takes too long to write" | Critical paths only — 4 tests catch 80% of regressions |
 
 ---
 
@@ -321,4 +446,4 @@ Blockers: [None / List remaining issues]
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2026-01-26*

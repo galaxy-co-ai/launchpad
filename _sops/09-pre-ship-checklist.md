@@ -2,6 +2,8 @@
 
 > **One-liner:** Final checks before going live to production
 
+**Version:** 1.0.0
+
 ---
 
 ## Overview
@@ -140,30 +142,22 @@
 
 **Output:** Stripe ready for live transactions
 
-### Step 5: Error Tracking Setup
-- [ ] Sentry project created
-- [ ] Sentry SDK installed
-- [ ] DSN added to environment
-- [ ] Test error captured
+### Step 5: Verify Error Tracking
+- [ ] Sentry was set up in SOP 06 (infrastructure)
+- [ ] Verify DSN is in production environment
+- [ ] Confirm test error appears in Sentry dashboard
+- [ ] Check source maps are uploading correctly
 
-**Sentry Setup:**
+**Note:** Sentry should already be configured from `06-infrastructure-provisioning`. This step verifies it's working in production.
+
+**Quick Verification:**
 ```bash
-# Install Sentry
-pnpm add @sentry/nextjs
-
-# Run setup wizard
-pnpm dlx @sentry/wizard@latest -i nextjs
+# Trigger a test error on production
+# Check Sentry dashboard within 1 minute
+# Verify error appears with correct source maps
 ```
 
-**Verify Sentry:**
-```typescript
-// Temporarily add to test
-throw new Error('Test Sentry integration');
-
-// Then remove after verifying in Sentry dashboard
-```
-
-**Output:** Error tracking active
+**Output:** Error tracking verified in production
 
 ### Step 6: Analytics Setup (Optional but Recommended)
 - [ ] Analytics tool chosen (Plausible, Vercel Analytics, etc.)
@@ -350,4 +344,4 @@ Blockers: [None / List any issues]
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2026-01-26*

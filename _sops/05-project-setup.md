@@ -2,6 +2,26 @@
 
 > **One-liner:** Scaffold project repo and development environment
 
+**Version:** 1.0.0
+
+---
+
+## Quick Start (Automated)
+
+**Prefer automation over manual steps.** Use the provided scripts:
+
+```powershell
+# One command to scaffold everything
+.\_scripts\new-project.ps1 -Name "my-saas" -Template "nextjs-web"
+
+# Then set up environment variables interactively
+.\_scripts\setup-env.ps1 -Project "my-saas"
+```
+
+The script handles: folder creation, template copying, git init, dependency install, and optional AI-generated PRD.
+
+**Only follow the manual steps below if the scripts fail or you need custom setup.**
+
 ---
 
 ## Overview
@@ -313,4 +333,4 @@ Blockers: [None / List any issues]
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2026-01-26*

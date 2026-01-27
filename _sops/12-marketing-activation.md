@@ -2,6 +2,8 @@
 
 > **One-liner:** Get first users and generate initial revenue
 
+**Version:** 1.0.0
+
 ---
 
 ## Overview
@@ -437,4 +439,4 @@ Happy to answer any questions.
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2026-01-26*

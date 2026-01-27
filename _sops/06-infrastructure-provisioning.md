@@ -2,6 +2,8 @@
 
 > **One-liner:** Connect database, auth, payments, and external services
 
+**Version:** 1.0.0
+
 ---
 
 ## Overview
@@ -186,7 +188,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: Request) {
   const body = await req.text();
-  const signature = headers().get('stripe-signature')!;
+  const headersList = await headers();
+  const signature = headersList.get('stripe-signature')!;
 
   let event: Stripe.Event;
 
@@ -250,7 +253,39 @@ STRIPE_WEBHOOK_SECRET (use production webhook after setup)
 
 **Output:** Production webhook configured
 
-### Step 7: Verify All Integrations
+### Step 7: Set Up Sentry Error Tracking
+- [ ] Create Sentry project (Next.js)
+- [ ] Install Sentry SDK
+- [ ] Add DSN to environment variables
+- [ ] Verify test error is captured
+
+**Sentry Setup:**
+```bash
+# Install Sentry
+pnpm add @sentry/nextjs
+
+# Run setup wizard (creates config files)
+pnpm dlx @sentry/wizard@latest -i nextjs
+```
+
+**Environment Variables:**
+```env
+SENTRY_DSN=https://xxxxx@xxxxx.ingest.sentry.io/xxxxx
+SENTRY_AUTH_TOKEN=sntrys_xxxxx
+SENTRY_ORG=your-org
+SENTRY_PROJECT=your-project
+```
+
+**Verify Setup:**
+```typescript
+// Temporarily add to test, then remove
+throw new Error('Test Sentry integration');
+// Check Sentry dashboard for the error
+```
+
+**Output:** Error tracking active from day one
+
+### Step 8: Verify All Integrations
 - [ ] Auth: Can sign up and sign in
 - [ ] Database: Data persists correctly
 - [ ] Payments: Test checkout completes
@@ -369,4 +404,4 @@ Blockers: [None / List any issues]
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2026-01-26*

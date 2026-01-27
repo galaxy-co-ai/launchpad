@@ -2,6 +2,34 @@
 
 > **One-liner:** Validate problem, market, and monetization before building
 
+**Version:** 1.0.0
+
+---
+
+## Which Validation SOP Should I Use?
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  New idea captured in vault                             │
+└─────────────────────────┬───────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│  Do you have high conviction already?                   │
+│  (Personal pain, customer request, obvious gap)         │
+└────────────┬────────────────────────────┬───────────────┘
+             │ YES                        │ NO / UNSURE
+             ▼                            ▼
+┌─────────────────────────┐  ┌────────────────────────────┐
+│  01-quick-validation    │  │  01a-rigorous-idea-audit   │
+│  (This SOP)             │  │  (Deep PMF validation)     │
+│  • 1-4 hours            │  │  • 4-8 hours               │
+│  • 125 points max       │  │  • 500 points max          │
+│  • Good for filtering   │  │  • 70% kill rate target    │
+└─────────────────────────┘  └────────────────────────────┘
+```
+
+**Rule of thumb:** If you'd bet $1,000 of your own money on this idea right now, use 01. Otherwise, use 01a.
+
 ---
 
 ## Overview
@@ -181,4 +209,4 @@ Blockers: [None / List any issues]
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2026-01-26*

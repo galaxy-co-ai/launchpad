@@ -2,6 +2,8 @@
 
 > **One-liner:** Plan user flows and UI before writing any code
 
+**Version:** 1.0.0
+
 ---
 
 ## Overview
@@ -94,6 +96,48 @@ SUCCESS → Pays, generates unlimited content
 | Pricing/Upgrade | Convert free users | Pay |
 
 **Output:** Screen inventory table
+
+### Step 2.5: Accessibility Planning
+
+Plan accessibility from the start — fixing it later is expensive and often requires redesigning components.
+
+- [ ] Review color contrast requirements (see checklist below)
+- [ ] Plan keyboard navigation for all interactive elements
+- [ ] Identify focus order for each screen
+- [ ] Note any complex widgets needing ARIA patterns
+- [ ] Confirm touch targets are sized appropriately
+
+**Accessibility Checklist (WCAG 2.1 AA):**
+
+| Requirement | Standard | How to Check |
+|-------------|----------|--------------|
+| Text contrast | 4.5:1 minimum | WebAIM Contrast Checker |
+| UI component contrast | 3:1 minimum | Buttons, inputs, icons |
+| Keyboard accessible | All interactions | Tab through entire flow |
+| Focus visible | Clear focus indicator | Check focus ring visibility |
+| Focus order | Logical reading order | Tab matches visual flow |
+| Form labels | Associated with inputs | Every input has a label |
+| Error messages | Descriptive + linked | Clear error states planned |
+| Touch targets | 44x44px minimum | Mobile tap areas |
+| Color independence | Info not color-only | Icons/text alongside color |
+
+**Common Patterns to Plan:**
+
+| Component | Accessibility Need |
+|-----------|-------------------|
+| Modal/Dialog | Focus trap, Escape to close |
+| Dropdown menu | Arrow key navigation |
+| Tabs | Arrow keys, proper ARIA roles |
+| Toast notifications | Role="alert" for screen readers |
+| Loading states | Aria-live regions |
+| Form validation | Error linked to field via aria-describedby |
+
+**Tools Reference:**
+- Contrast checker: webaim.org/resources/contrastchecker
+- Color-blind simulator: colourblindnesstest.com
+- Keyboard testing: Tab through without mouse
+
+**Output:** Accessibility notes for each screen
 
 ### Step 3: Design Landing Page Structure
 - [ ] Define above-the-fold content (hero)
@@ -235,6 +279,30 @@ Reference: `_design-system/tokens/colors.css`
 
 ---
 
+## Accessibility
+
+**Contrast Verified:**
+- [ ] Primary text on background: [ratio] (need 4.5:1)
+- [ ] Secondary text on background: [ratio] (need 4.5:1)
+- [ ] Primary button text/bg: [ratio] (need 4.5:1)
+- [ ] UI components on background: [ratio] (need 3:1)
+
+**Keyboard Navigation:**
+- [ ] All interactive elements reachable via Tab
+- [ ] Focus order matches visual flow
+- [ ] Focus indicators visible
+- [ ] Escape closes modals/dropdowns
+
+**Screen-Specific Notes:**
+
+| Screen | Accessibility Considerations |
+|--------|------------------------------|
+| Landing | [Notes] |
+| Dashboard | [Notes] |
+| [Screen] | [Notes] |
+
+---
+
 ## Key Interactions
 
 | Element | Interaction | Feedback |
@@ -264,6 +332,7 @@ Reference: `_design-system/tokens/colors.css`
 | User Flow | Diagram | In design brief | Clear path from entry to success |
 | Screen List | Table | In design brief | All MVP screens identified |
 | Component List | Checklist | In design brief | shadcn components identified |
+| Accessibility Notes | Checklist | In design brief | Contrast + keyboard nav documented |
 
 ---
 
@@ -273,6 +342,7 @@ Reference: `_design-system/tokens/colors.css`
 - [ ] **Screens Listed:** Every screen needed is identified
 - [ ] **Components Chosen:** Know which shadcn/ui components to use
 - [ ] **Landing Structure:** Hero, features, pricing planned
+- [ ] **Accessibility Planned:** Contrast verified, keyboard nav considered, touch targets sized
 - [ ] **Document Saved:** Design brief in `_vault/active/`
 
 **ALL gates must pass to proceed to next SOP.**
@@ -288,6 +358,7 @@ Reference: `_design-system/tokens/colors.css`
 | Custom components | Over-engineering | Use shadcn/ui defaults first |
 | Vague interactions | Assuming obvious | Document every click → response |
 | Skipping landing page | "I'll do it later" | Landing page IS the product for visitors |
+| Ignoring accessibility | "Add it later" | Check contrast + keyboard now — fixing later costs 10x |
 
 ---
 
@@ -305,4 +376,4 @@ Blockers: [None / List any issues]
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2026-01-26*

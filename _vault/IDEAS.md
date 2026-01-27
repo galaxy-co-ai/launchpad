@@ -2,7 +2,7 @@
 
 > Master index of all captured ideas across the Launchpad system.
 
-**Last Updated:** 2025-01-05
+**Last Updated:** 2026-01-26
 
 ---
 
@@ -11,10 +11,10 @@
 | Status | Count |
 |--------|-------|
 | Active | 0 |
-| Backlog | 1 |
+| Backlog | 0 |
 | Shipped | 0 |
 | Killed | 0 |
-| **Total** | **1** |
+| **Total** | **0** |
 
 ---
 
@@ -50,7 +50,7 @@
 
 | Slug | One-liner | Captured | Source |
 |------|-----------|----------|--------|
-| quickclaims-ai | Streamlined insurance claim supplement processing with AI | 2025-12-29 | Rise Roofing Supplements |
+| *None yet* | — | — | — |
 
 ### Shipped (Live Products)
 

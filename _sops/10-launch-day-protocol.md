@@ -2,6 +2,8 @@
 
 > **One-liner:** Deploy to production and verify everything works
 
+**Version:** 1.0.0
+
 ---
 
 ## Overview
@@ -188,6 +190,181 @@ I'd appreciate any feedback or shares!
 
 **Output:** Public announcement posted
 
+---
+
+## Product Hunt Launch Playbook
+
+Product Hunt can drive significant traffic and credibility for Micro-SaaS launches. This detailed playbook maximizes your chances of a successful PH launch.
+
+### Phase 1: Preparation (2 Weeks Before)
+
+**Find a Hunter:**
+- [ ] Identify 5-10 potential hunters (makers with 1K+ followers who actively hunt)
+- [ ] Check their recent hunts—do they hunt products like yours?
+- [ ] Reach out with personalized pitch (not generic template)
+- [ ] Confirm hunter and schedule date
+
+**Hunter Outreach Template:**
+```
+Subject: Would you hunt [Product Name]?
+
+Hi [Hunter Name],
+
+I've been following your work and loved your hunt of [Recent Product].
+I'm launching [Product Name]—[one sentence description].
+
+I think it'd resonate with the PH community because [reason].
+
+Would you be interested in hunting it on [proposed date]?
+
+Happy to share more details!
+
+[Your Name]
+```
+
+**Choose Launch Date:**
+- [ ] Avoid: Mondays (weekend hangover), Fridays (low engagement)
+- [ ] Avoid: Major holidays, Apple events, big tech announcements
+- [ ] Best days: Tuesday, Wednesday, Thursday
+- [ ] Check PH calendar for competing launches
+
+### Phase 2: Assets & Copy (1 Week Before)
+
+**Visual Assets:**
+- [ ] Logo (240x240px, PNG with transparent background)
+- [ ] Gallery images (1270x760px, 3-5 screenshots)
+- [ ] Video demo (optional but 2x engagement if included)
+- [ ] Maker photo (professional headshot)
+
+**Written Copy:**
+- [ ] Tagline (60 characters max, benefit-focused)
+- [ ] Description (265 characters, explain what + who for)
+- [ ] First comment (your story, why you built it, call to try)
+
+**Tagline Examples:**
+```
+Good: "Write 10x faster with AI-powered suggestions"
+Bad: "An innovative AI-powered writing assistant tool"
+
+Good: "Track habits without the guilt"
+Bad: "A beautiful habit tracking application"
+```
+
+**First Comment Template:**
+```
+Hey Product Hunt! 👋
+
+I'm [Name], and I built [Product] because [personal problem/story].
+
+After [time building/validating], I'm excited to finally share it.
+
+Here's what makes it different:
+• [Key differentiator 1]
+• [Key differentiator 2]
+
+I'd love your feedback—especially on [specific question].
+
+Try it free: [URL]
+```
+
+**Build Support Network:**
+- [ ] Create list of 20-30 people who will upvote/comment
+- [ ] Brief them: "Will launch on PH on [date], would appreciate genuine support"
+- [ ] Prepare DM template for launch day notification
+- [ ] Do NOT ask for "upvotes"—ask them to "check it out and share thoughts"
+
+### Phase 3: Launch Day (12:01 AM PST)
+
+**Timing Strategy:**
+- [ ] Submit at 12:01 AM PST (Pacific Standard Time)
+- [ ] This gives you full 24-hour ranking period
+- [ ] Set alarm if needed—don't miss the window
+- [ ] Verify listing goes live correctly
+
+**First 4 Hours (Critical Window):**
+- [ ] Post Twitter/X announcement immediately
+- [ ] Send notification to support network
+- [ ] Respond to EVERY comment within 30 minutes
+- [ ] Be online and present—don't schedule and forget
+
+**Launch Day DM Template:**
+```
+Hey! I just launched [Product] on Product Hunt!
+
+Would love if you could check it out and share your thoughts:
+[PH Link]
+
+No pressure to upvote—honest feedback is most valuable.
+
+Thanks! 🙏
+```
+
+**Engagement Tactics:**
+| Hour | Action |
+|------|--------|
+| 0-1 | Notify core supporters, respond to first comments |
+| 1-4 | Monitor actively, respond to all comments, share BTS on Twitter |
+| 4-8 | Continue engagement, share updates on progress |
+| 8-16 | Maintain presence, thank supporters publicly |
+| 16-24 | Final push, prepare post-launch content |
+
+**Comment Response Guidelines:**
+- Thank every commenter by name
+- Answer questions thoroughly
+- Ask follow-up questions to continue conversation
+- Share relevant details/stories
+- Never: Ask for upvotes, complain about ranking, argue with critics
+
+### Phase 4: Post-Launch (24-48 Hours)
+
+**Immediate Follow-Up:**
+- [ ] Thank hunters and supporters publicly
+- [ ] Share results on Twitter (even if modest)
+- [ ] Screenshot your ranking as a milestone
+- [ ] Send thank-you DMs to key supporters
+
+**Capture Value:**
+- [ ] Add "Featured on Product Hunt" badge to site
+- [ ] Export email list of followers (PH dashboard)
+- [ ] Note which comments/features got most traction
+- [ ] Identify potential beta users or power users from comments
+
+**Results Sharing Template:**
+```
+[Product] finished #[X] on Product Hunt!
+
+Results:
+• [X] upvotes
+• [X] comments
+• [X] new users
+• [X] paying customers
+
+Biggest learnings:
+• [Lesson 1]
+• [Lesson 2]
+
+Thanks to everyone who supported! 🙏
+
+What's next: [Your plans]
+```
+
+**Learn & Iterate:**
+- [ ] Document what worked and what didn't
+- [ ] Note feedback themes for product roadmap
+- [ ] Plan follow-up content based on traction
+- [ ] Consider re-launching for major updates (3-6 months later)
+
+### Product Hunt Success Metrics
+
+| Metric | Good | Great | Exceptional |
+|--------|------|-------|-------------|
+| Upvotes | 100+ | 300+ | 500+ |
+| Comments | 20+ | 50+ | 100+ |
+| Daily Ranking | Top 10 | Top 5 | #1 of the day |
+| Sign-ups from PH | 50+ | 200+ | 500+ |
+
+---
+
 ### Step 6: Monitor Launch Period (2-4 hours)
 - [ ] Keep Sentry open—watch for errors
 - [ ] Keep Stripe open—watch for payments
@@ -319,6 +496,8 @@ Apologies for any inconvenience—we'll be back shortly!"
 | Fixing non-critical bugs | Perfectionism | Note for later, don't derail launch |
 | No celebration | Moving too fast | Take a moment to appreciate the milestone |
 | Ghost town after launch | No follow-up | Continue marketing in days following |
+| PH launch at wrong time | Timezone confusion | 12:01 AM PST — set an alarm |
+| Asking for upvotes | Seems faster | Gets flagged — ask for "feedback" instead |
 
 ---
 
@@ -336,4 +515,4 @@ Blockers: [None / List any issues]
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2026-01-26*

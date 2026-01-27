@@ -2,6 +2,8 @@
 
 > **One-liner:** Watch for issues and collect early user feedback
 
+**Version:** 1.0.0
+
 ---
 
 ## Overview
@@ -347,4 +349,4 @@ Blockers: [None / List any issues]
 
 ---
 
-*Last Updated: 2025-12-28*
+*Last Updated: 2026-01-26*

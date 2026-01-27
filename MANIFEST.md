@@ -2,8 +2,8 @@
 
 > System status tracker — what's built, what's pending.
 
-**Last Updated:** 2026-01-24
-**Version:** 1.7.0 (AI-Powered SOP Assistant)
+**Last Updated:** 2026-01-26
+**Version:** 1.8.0 (SOP Improvements Sprint)
 
 ---
 
@@ -56,6 +56,7 @@
 ### SOPs (`_sops/`)
 | File | Status | Phase | Notes |
 |------|--------|-------|-------|
+| `VERSIONING.md` | ✅ Complete | — | SOP versioning policy |
 | `00-idea-intake.md` | ✅ Complete | Ideation | Capture and catalog ideas into vault |
 | `01-quick-validation.md` | ✅ Complete | Ideation | Validate problem, market, monetization |
 | `01a-rigorous-idea-audit.md` | ✅ Complete | Ideation | Deep PMF validation (70% kill rate) |
@@ -70,6 +71,27 @@
 | `10-launch-day-protocol.md` | ✅ Complete | Launch | Deploy and verify everything works |
 | `11-post-launch-monitoring.md` | ✅ Complete | Post-Launch | Watch for issues, collect feedback |
 | `12-marketing-activation.md` | ✅ Complete | Post-Launch | Get first users, generate revenue |
+
+#### SOP Version Table
+
+All SOPs follow semantic versioning. See `_sops/VERSIONING.md` for bump policy.
+
+| SOP | Version | Last Updated | Notable Changes |
+|-----|---------|--------------|-----------------|
+| `00-idea-intake` | 1.0.0 | 2026-01-26 | Initial versioned release |
+| `01-quick-validation` | 1.0.0 | 2026-01-26 | Initial versioned release |
+| `01a-rigorous-idea-audit` | 1.0.0 | 2026-01-26 | Initial versioned release |
+| `02-mvp-scope-contract` | 1.0.0 | 2026-01-26 | Initial versioned release |
+| `03-revenue-model-lock` | 1.0.0 | 2026-01-26 | Initial versioned release |
+| `04-design-brief` | 1.0.0 | 2026-01-26 | + Accessibility checklist (Step 2.5) |
+| `05-project-setup` | 1.0.0 | 2026-01-26 | Initial versioned release |
+| `06-infrastructure-provisioning` | 1.0.0 | 2026-01-26 | Initial versioned release |
+| `07-development-protocol` | 1.0.0 | 2026-01-26 | Initial versioned release |
+| `08-testing-qa-checklist` | 1.0.0 | 2026-01-26 | + Automated testing section (Step 5.5) |
+| `09-pre-ship-checklist` | 1.0.0 | 2026-01-26 | Initial versioned release |
+| `10-launch-day-protocol` | 1.0.0 | 2026-01-26 | + Product Hunt playbook |
+| `11-post-launch-monitoring` | 1.0.0 | 2026-01-26 | Initial versioned release |
+| `12-marketing-activation` | 1.0.0 | 2026-01-26 | Initial versioned release |
 
 ### Ideas Vault (`_vault/`)
 | File | Status | Notes |
@@ -104,6 +126,7 @@
 | `setup-env.ps1` | ✅ Complete | Interactive environment setup |
 | `provision-db.ps1` | ✅ Complete | Neon/Drizzle database provisioning |
 | `audit-idea.ps1` | ✅ Complete | PMF audit with AI-assisted scoring |
+| `sop-status.ps1` | ✅ Complete | SOP navigator for project progress tracking |
 | `modules/Invoke-ClaudeApi.psm1` | ✅ Complete | Claude API PowerShell module |
 
 ### AI Prompts (`_agents/prompts/`)
@@ -159,18 +182,18 @@ Priority 1: Core Files        [8/8]   ██████████ 100% ✅
 Priority 2: Governance        [5/5]   ██████████ 100% ✅
 Priority 3: Stack             [6/6]   ██████████ 100% ✅
 Priority 4: Design System     [9/9]   ██████████ 100% ✅
-Priority 5: SOPs              [14/14] ██████████ 100% ✅
+Priority 5: SOPs              [15/15] ██████████ 100% ✅
 Priority 6: Ideas Vault       [2/2]   ██████████ 100% ✅
 Priority 7: Templates         [9/9]   ██████████ 100% ✅
 Priority 8: Integrations      [1/1]   ██████████ 100% ✅
-Priority 9: Scripts           [7/7]   ██████████ 100% ✅
+Priority 9: Scripts           [8/8]   ██████████ 100% ✅
 Priority 10: Assets           [1/1]   ██████████ 100% ✅
 Priority 11: n8n Workflows    [4/4]   ██████████ 100% ✅
 Priority 12: CI/CD            [3/3]   ██████████ 100% ✅
 Priority 13: AI Prompts       [3/3]   ██████████ 100% ✅
 Priority 14: MCP Server       [13/13] ██████████ 100% ✅
 
-Overall: 85/85 files (100%) ✅
+Overall: 87/87 files (100%) ✅
 ```
 
 ---
@@ -179,6 +202,12 @@ Overall: 85/85 files (100%) ✅
 
 | Date | Change |
 |------|--------|
+| 2026-01-26 | SOP Improvements Sprint: Added Version 1.0.0 to all 14 SOPs |
+| 2026-01-26 | Created _sops/VERSIONING.md versioning policy document |
+| 2026-01-26 | Added accessibility checklist (Step 2.5) to SOP 04 |
+| 2026-01-26 | Added automated testing section (Step 5.5) to SOP 08 |
+| 2026-01-26 | Added comprehensive Product Hunt playbook to SOP 10 |
+| 2026-01-26 | Created sop-status.ps1 navigator script for tracking project SOP progress |
 | 2026-01-24 | Added TECH_BASELINE.md and SECURITY_BASELINE.md to lock canonical versions and security rules |
 | 2026-01-24 | Created sprint plan for baseline alignment + security hardening |
 | 2026-01-24 | Aligned launchpad-app package versions to the locked stack baseline |
